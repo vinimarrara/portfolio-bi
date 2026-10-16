@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Portfólio de BI de Vinicius Marrara dos Santos: painéis navegáveis, com dados simulados, de painéis de performance, funil, pagamentos, safras, CX e CRM.">
+<meta name="description" content="Portfólio de BI do Vini: réplica navegável, com dados simulados, de painéis de performance, funil, pagamentos, safras, CX e CRM.">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Portfólio de BI · Vinicius Marrara dos Santos</title>
+<title>Portfólio de BI do Vini</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -159,9 +159,9 @@ tr.sel td{background:var(--accent-soft)}
 
 <div class="app">
   <aside class="rail" aria-label="Páginas do relatório">
-    <div class="brand"><b>Torre de Controle</b><span>Portfólio de BI · Vinicius Marrara</span></div>
+    <div class="brand"><b>Torre de Controle</b><span>Portfólio de BI · Vini</span></div>
     <nav class="nav" id="nav"></nav>
-    <div class="who"><b>Vinicius Marrara dos Santos</b><span>Coordenador de Performance, Dados &amp; CX numa empresa de compra de cotas de consórcio.</span><span>Todos os números aqui são simulados.</span><span><a href="https://www.linkedin.com/in/vinicius-marrara-dos-santos-423b6973" target="_blank" rel="noopener" style="color:var(--rail-hi)">LinkedIn ↗</a></span></div>
+    <div class="who"><b>Vini</b><span>Desenvolvedor e product owner de dados de performance numa empresa de compra de cotas de consórcio.</span><span>Todos os números aqui são simulados.</span></div>
   </aside>
   <main>
     <div class="head">
@@ -211,7 +211,7 @@ for(let t=0;t<N;t++){
     const nf=sround(env*.0102*AC[a]*PC[p]*(.75+.5*R()));
     for(let i=0;i<nf;i++){
       const r=R(), m=r<.6?0:r<.87?1:2;
-      const base=[35e3,53e3,79e3][m];
+      const base=[78e3,118e3,176e3][m];
       const credito=Math.round(base*Math.exp((R()+R()+R()-1.5)*.55)/100)*100;
       const prazo=Math.max(2,Math.round(PRAZO[p]*(.45+R()*1.1+(R()<.08?1.2:0))));
       const lag=Math.min(300,Math.round(-Math.log(1-R()*.999)*24));
@@ -238,7 +238,7 @@ for(let t=0;t<N;t++){
     });
   }
 }
-const META_MES=k=>{const i=k-(2025*12);return 10.6e6*(1+i*.021)}; // meta de crédito pago por mês
+const META_MES=k=>{const i=k-(2025*12);return 23.5e6*(1+i*.021)}; // meta de crédito pago por mês
 
 /* ===================== ESTADO E FILTROS ===================== */
 const S={per:'12m',adm:-1,par:-1,mod:-1,mes:null,page:'exec',caas:0};
@@ -388,19 +388,19 @@ function pExec(){
   chart('cMeta',{type:'bar',data:{labels:months.map(mLabel),datasets:[
     Object.assign(bar4({label:'Crédito pago',data:mm.map(x=>x.pc),backgroundColor:months.map(k=>S.mes===k?s[1]:s[0]),order:2})),
     {type:'line',label:'Meta',data:metaVals,borderColor:css('--ink-2'),borderDash:[5,4],borderWidth:2,pointRadius:0,order:1}]},
-    options:{onClick:(e,els)=>{if(els[0]){const k=months[els[0].index];S.mes=S.mes===k?null:k;render()}},scales:{y:{ticks:{callback:v=>brl(v)}},x:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+brl(c.raw)}}}}},
+    options:{onClick:(e,els)=>{if(els[0]){const k=months[els[0].index];S.mes=S.mes===k?null:k;setTimeout(render,0)}},scales:{y:{ticks:{callback:v=>brl(v)}},x:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+brl(c.raw)}}}}},
     {head:['Mês','Crédito pago','Meta','% da meta'],rows:months.map((k,i)=>[mLabel(k),brl(mm[i].pc),brl(metaVals[i]),pct(mm[i].pc/metaVals[i])])});
   const Fr=F.filter(r=>inR(r.t,R0));
   const byA=ADMS.map((n,i)=>{let c=0,q=0;for(const r of FECH)if(inR(r.t,R0)&&r.a===i&&(S.par<0||r.p===S.par)&&(S.mod<0||r.m===S.mod)){c+=r.credito;q++}return{n,i,c,q}}).sort((x,y)=>y.c-x.c);
   chart('cAdm',{type:'bar',data:{labels:byA.map(x=>x.n),datasets:[bar4({label:'Crédito fechado',data:byA.map(x=>x.c),backgroundColor:byA.map(x=>S.adm<0||S.adm===x.i?s[0]:css('--q2')),borderSkipped:'start'})]},
-    options:{indexAxis:'y',onClick:(e,els)=>{if(els[0]){const i=byA[els[0].index].i;S.adm=S.adm===i?-1:i;render()}},scales:{x:{ticks:{callback:v=>brl(v),maxRotation:0,maxTicksLimit:5}},y:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>brl(c.raw)+' · '+int(byA[c.dataIndex].q)+' cotas'}}}}},
+    options:{indexAxis:'y',onClick:(e,els)=>{if(els[0]){const i=byA[els[0].index].i;S.adm=S.adm===i?-1:i;setTimeout(render,0)}},scales:{x:{ticks:{callback:v=>brl(v),maxRotation:0,maxTicksLimit:5}},y:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>brl(c.raw)+' · '+int(byA[c.dataIndex].q)+' cotas'}}}}},
     {head:['Administradora','Crédito fechado','Cotas'],rows:byA.map(x=>[x.n,brl(x.c),int(x.q)])});
   const byP=PARS.map((n,i)=>{let q=0,c=0,pq=0,np=0,pz=0;for(const r of FECH){if(!((S.adm<0||r.a===S.adm)&&(S.mod<0||r.m===S.mod)&&r.p===i))continue;if(inR(r.t,R0)){q++;c+=r.credito}if(r.tp!=null&&inR(r.tp,R0)){pq++;pz+=r.prazo;if(r.prazo<=21)np++}}return{n,i,q,c,pq,np,pz}});
   const mxq=Math.max(...byP.map(x=>x.q))||1;
   document.getElementById('tPar').innerHTML='<table><thead><tr><th>Parceiro</th><th>Cotas</th><th>Crédito</th><th>Pagas</th><th>No prazo</th><th>Prazo médio</th></tr></thead><tbody>'+byP.map(x=>{const np=x.pq?x.np/x.pq:0;const stc=np>=.85?'--good':np>=.7?'--warn':'--crit';return`<tr class="click ${S.par===x.i?'sel':''}" data-par="${x.i}"><td>${x.n}</td><td><span style="display:inline-flex;align-items:center;gap:8px;justify-content:flex-end;width:100%"><span style="display:inline-block;height:6px;width:${Math.round(56*x.q/mxq)}px;background:var(--s1);border-radius:3px"></span>${int(x.q)}</span></td><td>${brl(x.c)}</td><td>${int(x.pq)}</td><td><span class="pill"><i style="background:var(${stc})"></i>${pct(np,0)}</span></td><td>${x.pq?nf1.format(x.pz/x.pq)+' d':'–'}</td></tr>`}).join('')+'</tbody></table>';
   const mix=MODS.map((m,j)=>months.map(k=>Fr.filter(r=>r.m===j&&mKey(r.t)===k).length));
   chart('cMix',{type:'bar',data:{labels:months.map(mLabel),datasets:MODS.map((m,j)=>bar4({label:m,data:mix[j],backgroundColor:s[j],borderSkipped:false,borderRadius:2,borderColor:css('--panel'),borderWidth:{top:2}}))},
-    options:{plugins:{legend:{display:true,position:'top',align:'start',labels:{boxWidth:10,boxHeight:10,useBorderRadius:true,borderRadius:3}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>int(v)}}},onClick:(e,els)=>{if(els[0]){const j=els[0].datasetIndex;S.mod=S.mod===j?-1:j;render()}}}},
+    options:{plugins:{legend:{display:true,position:'top',align:'start',labels:{boxWidth:10,boxHeight:10,useBorderRadius:true,borderRadius:3}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>int(v)}}},onClick:(e,els)=>{if(els[0]){const j=els[0].datasetIndex;S.mod=S.mod===j?-1:j;setTimeout(render,0)}}}},
     {head:['Mês',...MODS],rows:months.map((k,i)=>[mLabel(k),...MODS.map((m,j)=>int(mix[j][i]))])});
 }
 
@@ -411,7 +411,7 @@ function pFunil(){
   const env=sum(E,'env'),vis=sum(E,'vis'),pre=sum(E,'pre'),con=sum(E,'con'),fec=F.length,pag=F.filter(r=>r.tp!=null).length;
   const st=[['Proposta liberada',env],['Visualizou',vis],['Preencheu dados',pre],['Gerou contrato',con],['Assinou (fechada)',fec],['Paga',pag]];
   const s=SER(), ramp=['--q7','--q6','--q5','--q4','--q3','--q2'].map(css);
-  const byA=ADMS.map((n,i)=>{const e=E.filter(r=>r.a===i),f=F.filter(r=>r.a===i);const ev=sum(e,'env'),vv=sum(e,'vis');return{n,i,ev,vis:ev?vv/ev:0,conv:vv?f.length/vv:0,fe:ev?f.length/ev:0,q:f.length}});
+  const byA=ADMS.map((n,i)=>{const e=ENV.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&inR(r.t,R0)),f=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&(S.mod<0||r.m===S.mod)&&inR(r.t,R0));const ev=sum(e,'env'),vv=sum(e,'vis');return{n,i,ev,vis:ev?vv/ev:0,conv:vv?f.length/vv:0,fe:ev?f.length/ev:0,q:f.length}});
   const vals=byA.map(x=>x.conv), mn=Math.min(...vals), mx=Math.max(...vals);
   const heat=v=>{const q=['--q1','--q2','--q3','--q4','--q5','--q6'];const i=Math.min(5,Math.floor(((v-mn)/((mx-mn)||1))*5.99));return[css(q[i]),i>=3]};
   // semanas
@@ -452,14 +452,14 @@ function pPag(){
       <div style="display:flex;gap:28px;flex-wrap:wrap"><div><div class="l hint">Cotas</div><div style="font-family:var(--f-display);font-weight:800;font-size:28px">${int(pend.length)}</div></div><div><div class="l hint">Crédito</div><div style="font-family:var(--f-display);font-weight:800;font-size:28px">${brl(pend.reduce((a,r)=>a+r.credito,0))}</div></div></div>
       <div class="tablewrap" style="max-height:210px"><table><thead><tr><th>Parceiro</th><th>Cotas</th><th>Crédito</th><th>Mais antiga</th></tr></thead><tbody>${PARS.map((n,i)=>{const x=pend.filter(r=>r.p===i);if(!x.length)return'';const old=Math.min(...x.map(r=>r.t));return`<tr><td>${n}</td><td>${int(x.length)}</td><td>${brl(x.reduce((a,r)=>a+r.credito,0))}</td><td>${N-1-old} dias</td></tr>`}).join('')}</tbody></table></div></section>
   </div>`;
-  chart('cDia',{type:'bar',data:{labels:keys.map(lab),datasets:[bar4({label:'Cotas fechadas',data:keys.map(k=>qBy.get(k)||0),backgroundColor:s[0],maxBarThickness:long?34:14})]},options:{scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},y:{ticks:{callback:v=>int(v)}}},plugins:{tooltip:{callbacks:{label:c=>int(c.raw)+' cotas · '+brl(cBy.get(keys[c.dataIndex])||0)}}},onClick:(e,els)=>{if(els[0]&&long){const k=keys[els[0].index];S.mes=S.mes===k?null:k;render()}}}},
+  chart('cDia',{type:'bar',data:{labels:keys.map(lab),datasets:[bar4({label:'Cotas fechadas',data:keys.map(k=>qBy.get(k)||0),backgroundColor:s[0],maxBarThickness:long?34:14})]},options:{scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14}},y:{ticks:{callback:v=>int(v)}}},plugins:{tooltip:{callbacks:{label:c=>int(c.raw)+' cotas · '+brl(cBy.get(keys[c.dataIndex])||0)}}},onClick:(e,els)=>{if(els[0]&&long){const k=keys[els[0].index];S.mes=S.mes===k?null:k;setTimeout(render,0)}}}},
     {head:[long?'Mês':'Dia','Cotas','Crédito'],rows:keys.map(k=>[lab(k),int(qBy.get(k)||0),brl(cBy.get(k)||0)])});
   chart('cPz',{type:'bar',data:{labels:keys.map(lab),datasets:[bar4({label:'No prazo',data:keys.map(k=>noP.get(k)||0),backgroundColor:s[2],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:14}),bar4({label:'Em atraso',data:keys.map(k=>atP.get(k)||0),backgroundColor:s[1],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:14})]},options:{plugins:{legend:{display:true,position:'top',align:'start',labels:{boxWidth:10,boxHeight:10}}},scales:{x:{stacked:true,grid:{display:false},ticks:{maxTicksLimit:12}},y:{stacked:true}}}},
     {head:[long?'Mês':'Dia','No prazo','Em atraso','% no prazo'],rows:keys.map(k=>{const a=noP.get(k)||0,b=atP.get(k)||0;return[lab(k),int(a),int(b),a+b?pct(a/(a+b)):'–']})});
   chart('cHist',{type:'bar',data:{labels:bins,datasets:[bar4({label:'Cotas pagas',data:hist,backgroundColor:hist.map((_,i)=>i<=2?s[0]:css('--q2'))})]},options:{scales:{x:{grid:{display:false},title:{display:true,text:'dias'}},y:{ticks:{callback:v=>int(v)}}}}},
     {head:['Dias','Cotas pagas'],rows:bins.map((b,i)=>[b,int(hist[i])])});
   chart('cPP',{type:'bar',data:{labels:byP.map(x=>x.n),datasets:[bar4({label:'Prazo médio',data:byP.map(x=>x.avg),backgroundColor:byP.map(x=>S.par<0||S.par===x.i?s[0]:css('--q2'))}),{type:'line',label:'Referência',data:byP.map(()=>21),borderColor:css('--crit'),borderDash:[5,4],borderWidth:2,pointRadius:0}]},
-    options:{onClick:(e,els)=>{if(els[0]){const i=byP[els[0].index].i;S.par=S.par===i?-1:i;render()}},scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+' d'}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+nf1.format(c.raw)+' dias'}}}}},
+    options:{onClick:(e,els)=>{if(els[0]){const i=byP[els[0].index].i;S.par=S.par===i?-1:i;setTimeout(render,0)}},scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+' d'}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+nf1.format(c.raw)+' dias'}}}}},
     {head:['Parceiro','Prazo médio','Mediana','Cotas pagas'],rows:byP.map(x=>[x.n,nf1.format(x.avg)+' d',x.med+' d',int(x.q)])});
 }
 
@@ -544,7 +544,7 @@ function pCrm(){
   </div>`;
   chart('cCan',{type:'bar',data:{labels:months.map(mLabel),datasets:CAN.map((c,j)=>bar4({label:c,data:mByC[j],backgroundColor:s[j],borderSkipped:false,borderRadius:2}))},options:{plugins:{legend:{display:true,position:'top',align:'start',labels:{boxWidth:10,boxHeight:10}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>int(v/1000)+' mil'}}}}},
     {head:['Mês',...CAN],rows:months.map((k,i)=>[mLabel(k),...CAN.map((c,j)=>int(mByC[j][i]))])});
-  chart('cEnt',{type:'bar',data:{labels:byA.map(x=>x.nm),datasets:[bar4({label:'Entrega',data:byA.map(x=>x.taxa),backgroundColor:byA.map(x=>S.adm<0||S.adm===x.i?s[0]:css('--q2'))})]},options:{indexAxis:'y',onClick:(e,els)=>{if(els[0]){const i=byA[els[0].index].i;S.adm=S.adm===i?-1:i;render()}},scales:{x:{min:.7,max:.95,ticks:{callback:v=>pct(v,0)}},y:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>pct(c.raw)}}}}},
+  chart('cEnt',{type:'bar',data:{labels:byA.map(x=>x.nm),datasets:[bar4({label:'Entrega',data:byA.map(x=>x.taxa),backgroundColor:byA.map(x=>S.adm<0||S.adm===x.i?s[0]:css('--q2'))})]},options:{indexAxis:'y',onClick:(e,els)=>{if(els[0]){const i=byA[els[0].index].i;S.adm=S.adm===i?-1:i;setTimeout(render,0)}},scales:{x:{min:.7,max:.95,ticks:{callback:v=>pct(v,0)}},y:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>pct(c.raw)}}}}},
     {head:['Administradora','Disparos','Entrega'],rows:byA.map(x=>[x.nm,int(x.e),pct(x.taxa)])});
 }
 
@@ -553,12 +553,12 @@ const SIMS=[
  {n:'Simulação 1',d:'Operação em crescimento forte, com cinco parceiros compradores',shape:u=>.35+1.15*Math.pow(u,1.4),base:520,pars:[0,1,2,3,4],plano:null,seed:11},
  {n:'Simulação 2',d:'Operação madura e sazonal, com picos a cada trimestre',shape:u=>.9+.28*Math.sin(u*Math.PI*7)+.08*u,base:430,pars:[0,1,2,3],plano:null,seed:22},
  {n:'Simulação 3',d:'Parceria pequena que acelera no último semestre',shape:u=>.2+(u>.62?2.4*(u-.62)/.38:0)+.15*u,base:60,pars:[0,1],plano:null,seed:33},
- {n:'Simulação 4',d:'Parceria nova, acompanhada contra o business plan',shape:u=>u<.7?0:(.25+2.6*(u-.7)),base:240,pars:[0,2,3],plano:0.68e6,seed:44}
+ {n:'Simulação 4',d:'Parceria nova, acompanhada contra o business plan',shape:u=>u<.7?0:(.25+2.6*(u-.7)),base:240,pars:[0,2,3],plano:1.5e6,seed:44}
 ];
 function simData(sm){
   const r=rng(sm.seed); const ks=[];for(let k=2025*12;k<=mKey(N-1);k++)ks.push(k);
   const W=[.5,.2,.14,.1,.06];
-  const rows=ks.map((k,i)=>{const u=i/(ks.length-1);const tot=sm.base*sm.shape(u)*(.88+.24*r())*(k===mKey(N-1)?.5:1);const per=sm.pars.map((p,j)=>Math.round(tot*W[j]/W.slice(0,sm.pars.length).reduce((a,b)=>a+b,0)*(.85+.3*r())));const ass=per.reduce((a,b)=>a+b,0);const pag=Math.round(ass*(.82+.1*r()));const ticket=40e3*(.9+.2*r());return{k,per,ass,pag,fc:pag*ticket,rec:pag*ticket*.072}});
+  const rows=ks.map((k,i)=>{const u=i/(ks.length-1);const tot=sm.base*sm.shape(u)*(.88+.24*r())*(k===mKey(N-1)?.5:1);const per=sm.pars.map((p,j)=>Math.round(tot*W[j]/W.slice(0,sm.pars.length).reduce((a,b)=>a+b,0)*(.85+.3*r())));const ass=per.reduce((a,b)=>a+b,0);const pag=Math.round(ass*(.82+.1*r()));const ticket=88e3*(.9+.2*r());return{k,per,ass,pag,fc:pag*ticket,rec:pag*ticket*.072}});
   return rows;
 }
 function pCaas(){
@@ -568,7 +568,7 @@ function pCaas(){
   const snap=sm.pars.map(p=>({n:PARS[p],ac:Math.round(ass/120*(.4+rr())),at:Math.round(ass/180*(.4+rr())),ap:Math.round(ass/60*(.4+rr()))}));
   const vis=rows.filter(r=>r.ass>0); const L=vis.slice(-14);
   let acc=0,accP=0; const accR=L.map(r=>acc+=r.rec); const planoStart=L.findIndex(r=>r.ass>0);
-  const accPl=sm.plano?L.map((r,i)=>accP+=sm.plano):null;
+  const planoM=sm.plano?L.slice(-6).reduce((a,r)=>a+r.rec,0)/6*1.12:0;const ini=L.findIndex(x=>x.ass>0);const accPl=sm.plano?L.map((r,i)=>{if(i>=ini)accP+=planoM*Math.min(1,(i-ini+1)/4);return accP}):null;
   document.getElementById('page').innerHTML=`
   <div class="slicers" style="position:static"><div class="sl"><label>Parceria</label>${SIMS.map((x,i)=>`<button class="chip" data-sim="${i}" aria-pressed="${S.caas===i}">${x.n}</button>`).join('')}</div><span class="hint">${sm.d}</span></div>
   <div class="kpis k4" style="margin-top:14px">${[['Cotas assinadas · 12 meses',int(ass)],['Cotas pagas · 12 meses',int(pag)],['Fundo comum pago',brl(fc)],['Receita gerada',brl(rec)]].map(k=>`<div class="kpi"><span class="l">${k[0]}</span><span class="v">${k[1]}</span></div>`).join('')}</div>
@@ -589,7 +589,7 @@ function pCaas(){
 /* ---------- 8. Sobre ---------- */
 function pSobre(){
   document.getElementById('page').innerHTML=`<div class="grid">
-  <section class="card c12"><div class="ch"><div><h3>Do dado bruto ao painel</h3><div class="sub">O caminho que os dados percorrem, da fonte até o painel</div></div></div>
+  <section class="card c12"><div class="ch"><div><h3>Do dado bruto ao painel</h3><div class="sub">O caminho que os números reais percorrem nos painéis originais</div></div></div>
     <div class="flow">
       <div class="step"><b>Fontes</b><span>Plataforma de autosserviço, chat com IA, CRM de disparos, pesquisas de NPS e tickets.</span></div>
       <div class="step"><b>Coleta em Python</b><span>Robôs agendados que extraem e tratam os dados todos os dias.</span></div>
@@ -597,7 +597,7 @@ function pSobre(){
       <div class="step"><b>Painéis em Apps Script</b><span>Torre de Controle interna e um painel por administradora parceira, com perfis de acesso.</span></div>
     </div></section>
   <section class="card c7"><div class="ch"><div><h3>Sobre este portfólio</h3></div></div>
-    <div class="prose"><p>Este é um portfólio navegável inspirado nos painéis que construo no dia a dia: a Torre de Controle, usada pela operação para acompanhar fechamento, pagamento, funil e experiência do cliente, e os dashboards entregues a cada administradora parceira.</p>
+    <div class="prose"><p>Esta é uma réplica navegável dos painéis que construo no dia a dia: a Torre de Controle, usada pela operação para acompanhar fechamento, pagamento, funil e experiência do cliente, e os dashboards entregues a cada administradora parceira.</p>
     <p>Para poder mostrar o trabalho, todos os números foram gerados por simulação, com comportamento parecido com o real (sazonalidade semanal, prazos de pagamento, safras que amadurecem). Administradoras, parceiros e clientes têm nomes genéricos.</p>
     <p>Navegue pelas páginas à esquerda, use os filtros do topo e clique nos gráficos para filtrar os outros visuais, como num relatório de BI.</p></div></section>
   <section class="card c5"><div class="ch"><div><h3>O que dá para explorar</h3></div></div>
