@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Portfólio de BI do Vini: réplica navegável, com dados simulados, de painéis de performance, funil, pagamentos, safras, CX e CRM.">
+<meta name="description" content="Portfólio de BI de Vinicius Marrara dos Santos: painéis navegáveis, com dados simulados, de painéis de performance, funil, pagamentos, safras, CX e CRM.">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Portfólio de BI do Vini</title>
+<title>Portfólio de BI · Vinicius Marrara dos Santos</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -159,9 +159,9 @@ tr.sel td{background:var(--accent-soft)}
 
 <div class="app">
   <aside class="rail" aria-label="Páginas do relatório">
-    <div class="brand"><b>Torre de Controle</b><span>Portfólio de BI · Vini</span></div>
+    <div class="brand"><b>Torre de Controle</b><span>Portfólio de BI · Vinicius Marrara</span></div>
     <nav class="nav" id="nav"></nav>
-    <div class="who"><b>Vini</b><span>Desenvolvedor e product owner de dados de performance numa empresa de compra de cotas de consórcio.</span><span>Todos os números aqui são simulados.</span></div>
+    <div class="who"><b>Vinicius Marrara dos Santos</b><span>Coordenador de Performance, Dados &amp; CX numa empresa de compra de cotas de consórcio.</span><span>Todos os números aqui são simulados.</span><span><a href="https://www.linkedin.com/in/vinicius-marrara-dos-santos-423b6973" target="_blank" rel="noopener" style="color:var(--rail-hi)">LinkedIn ↗</a></span></div>
   </aside>
   <main>
     <div class="head">
@@ -211,7 +211,7 @@ for(let t=0;t<N;t++){
     const nf=sround(env*.0102*AC[a]*PC[p]*(.75+.5*R()));
     for(let i=0;i<nf;i++){
       const r=R(), m=r<.6?0:r<.87?1:2;
-      const base=[78e3,118e3,176e3][m];
+      const base=[35e3,53e3,79e3][m];
       const credito=Math.round(base*Math.exp((R()+R()+R()-1.5)*.55)/100)*100;
       const prazo=Math.max(2,Math.round(PRAZO[p]*(.45+R()*1.1+(R()<.08?1.2:0))));
       const lag=Math.min(300,Math.round(-Math.log(1-R()*.999)*24));
@@ -238,7 +238,7 @@ for(let t=0;t<N;t++){
     });
   }
 }
-const META_MES=k=>{const i=k-(2025*12);return 23.5e6*(1+i*.021)}; // meta de crédito pago por mês
+const META_MES=k=>{const i=k-(2025*12);return 10.6e6*(1+i*.021)}; // meta de crédito pago por mês
 
 /* ===================== ESTADO E FILTROS ===================== */
 const S={per:'12m',adm:-1,par:-1,mod:-1,mes:null,page:'exec',caas:0};
@@ -553,12 +553,12 @@ const SIMS=[
  {n:'Simulação 1',d:'Operação em crescimento forte, com cinco parceiros compradores',shape:u=>.35+1.15*Math.pow(u,1.4),base:520,pars:[0,1,2,3,4],plano:null,seed:11},
  {n:'Simulação 2',d:'Operação madura e sazonal, com picos a cada trimestre',shape:u=>.9+.28*Math.sin(u*Math.PI*7)+.08*u,base:430,pars:[0,1,2,3],plano:null,seed:22},
  {n:'Simulação 3',d:'Parceria pequena que acelera no último semestre',shape:u=>.2+(u>.62?2.4*(u-.62)/.38:0)+.15*u,base:60,pars:[0,1],plano:null,seed:33},
- {n:'Simulação 4',d:'Parceria nova, acompanhada contra o business plan',shape:u=>u<.7?0:(.25+2.6*(u-.7)),base:240,pars:[0,2,3],plano:1.5e6,seed:44}
+ {n:'Simulação 4',d:'Parceria nova, acompanhada contra o business plan',shape:u=>u<.7?0:(.25+2.6*(u-.7)),base:240,pars:[0,2,3],plano:0.68e6,seed:44}
 ];
 function simData(sm){
   const r=rng(sm.seed); const ks=[];for(let k=2025*12;k<=mKey(N-1);k++)ks.push(k);
   const W=[.5,.2,.14,.1,.06];
-  const rows=ks.map((k,i)=>{const u=i/(ks.length-1);const tot=sm.base*sm.shape(u)*(.88+.24*r())*(k===mKey(N-1)?.5:1);const per=sm.pars.map((p,j)=>Math.round(tot*W[j]/W.slice(0,sm.pars.length).reduce((a,b)=>a+b,0)*(.85+.3*r())));const ass=per.reduce((a,b)=>a+b,0);const pag=Math.round(ass*(.82+.1*r()));const ticket=88e3*(.9+.2*r());return{k,per,ass,pag,fc:pag*ticket,rec:pag*ticket*.072}});
+  const rows=ks.map((k,i)=>{const u=i/(ks.length-1);const tot=sm.base*sm.shape(u)*(.88+.24*r())*(k===mKey(N-1)?.5:1);const per=sm.pars.map((p,j)=>Math.round(tot*W[j]/W.slice(0,sm.pars.length).reduce((a,b)=>a+b,0)*(.85+.3*r())));const ass=per.reduce((a,b)=>a+b,0);const pag=Math.round(ass*(.82+.1*r()));const ticket=40e3*(.9+.2*r());return{k,per,ass,pag,fc:pag*ticket,rec:pag*ticket*.072}});
   return rows;
 }
 function pCaas(){
@@ -589,7 +589,7 @@ function pCaas(){
 /* ---------- 8. Sobre ---------- */
 function pSobre(){
   document.getElementById('page').innerHTML=`<div class="grid">
-  <section class="card c12"><div class="ch"><div><h3>Do dado bruto ao painel</h3><div class="sub">O caminho que os números reais percorrem nos painéis originais</div></div></div>
+  <section class="card c12"><div class="ch"><div><h3>Do dado bruto ao painel</h3><div class="sub">O caminho que os dados percorrem, da fonte até o painel</div></div></div>
     <div class="flow">
       <div class="step"><b>Fontes</b><span>Plataforma de autosserviço, chat com IA, CRM de disparos, pesquisas de NPS e tickets.</span></div>
       <div class="step"><b>Coleta em Python</b><span>Robôs agendados que extraem e tratam os dados todos os dias.</span></div>
@@ -597,7 +597,7 @@ function pSobre(){
       <div class="step"><b>Painéis em Apps Script</b><span>Torre de Controle interna e um painel por administradora parceira, com perfis de acesso.</span></div>
     </div></section>
   <section class="card c7"><div class="ch"><div><h3>Sobre este portfólio</h3></div></div>
-    <div class="prose"><p>Esta é uma réplica navegável dos painéis que construo no dia a dia: a Torre de Controle, usada pela operação para acompanhar fechamento, pagamento, funil e experiência do cliente, e os dashboards entregues a cada administradora parceira.</p>
+    <div class="prose"><p>Este é um portfólio navegável inspirado nos painéis que construo no dia a dia: a Torre de Controle, usada pela operação para acompanhar fechamento, pagamento, funil e experiência do cliente, e os dashboards entregues a cada administradora parceira.</p>
     <p>Para poder mostrar o trabalho, todos os números foram gerados por simulação, com comportamento parecido com o real (sazonalidade semanal, prazos de pagamento, safras que amadurecem). Administradoras, parceiros e clientes têm nomes genéricos.</p>
     <p>Navegue pelas páginas à esquerda, use os filtros do topo e clique nos gráficos para filtrar os outros visuais, como num relatório de BI.</p></div></section>
   <section class="card c5"><div class="ch"><div><h3>O que dá para explorar</h3></div></div>
