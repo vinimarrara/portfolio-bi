@@ -47,7 +47,7 @@ button{font:inherit;color:inherit}
 .brand span{font-size:12px}
 .nav{display:flex;flex-direction:column;gap:2px}
 .nav .grp{font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;opacity:.6;margin:12px 0 4px 10px}
-.nav button{display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;cursor:pointer;color:var(--rail-ink);font-weight:500}
+.nav button{display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;color:var(--rail-ink);font-weight:500}
 .nav button:hover{background:rgba(255,255,255,.06);color:var(--rail-hi)}
 .nav button[aria-current="page"]{background:rgba(75,147,255,.18);color:var(--rail-hi)}
 .nav button .n{font-family:var(--f-mono);font-size:11px;opacity:.55;width:18px}
@@ -310,12 +310,26 @@ function monthsIn([a,b]){const out=[];for(let k=mKey(a);k<=mKey(b);k++)out.push(
 /* ===================== PÁGINAS ===================== */
 const PAGES=[
  {id:'exec',grp:'Torre de Controle',t:'Visão executiva',s:'Fechamento, pagamento e meta da operação de compra de cotas, num só lugar.'},
+ {id:'daily',grp:'Torre de Controle',t:'Daily',s:'Pauta da reunião diária: o dia contra ontem e contra a média do mesmo dia da semana.'},
  {id:'funil',grp:'Torre de Controle',t:'Funil de conversão',s:'Da proposta liberada à cota paga, com conversão por administradora.'},
  {id:'pag',grp:'Torre de Controle',t:'Fechamento e pagamentos',s:'Volume diário, pagamentos no prazo e tempo até o pagamento por parceiro.'},
+ {id:'transf',grp:'Torre de Controle',t:'Transferências',s:'Cotas aguardando transferência e pagamento, prazo por administradora e fila de cobrança.'},
+ {id:'cancel',grp:'Torre de Controle',t:'Cancelamentos',s:'Volume, crédito, motivos e origem dos cancelamentos.'},
+ {id:'pend',grp:'Torre de Controle',t:'Pendências',s:'Fila operacional: motivos, etapa, tempo em aberto e casos mais antigos.'},
  {id:'safra',grp:'Torre de Controle',t:'Safras',s:'Conversão acumulada de cada mês de envio ao longo dos meses seguintes.'},
+ {id:'metas',grp:'Torre de Controle',t:'Metas',s:'Meta × realizado de crédito pago, cotas, conversão e visualização.'},
+ {id:'precos',grp:'Carteira e precificação',t:'Preços',s:'Preços gerados pelo motor de precificação: aprovados, descartados, motivos e deságio.'},
+ {id:'grandes',grp:'Carteira e precificação',t:'Cotas grandes',s:'Cotas acima de R$ 100 mil ainda no funil, priorizadas para contato.'},
+ {id:'perfil',grp:'Carteira e precificação',t:'Perfil de cotas',s:'Mix e comportamento das cotas por faixa de crédito.'},
+ {id:'grupos',grp:'Carteira e precificação',t:'Grupos',s:'Grupos de consórcio por administradora: vagas, encerramento e situação.'},
  {id:'cx',grp:'Relacionamento',t:'Experiência do cliente',s:'NPS, satisfação no chat (IA e humano) e transbordo para atendente.'},
+ {id:'atend',grp:'Relacionamento',t:'Atendimentos',s:'Volume IA × atendente, TMA, TMR, SLA, motivos e horário de pico.'},
+ {id:'ra',grp:'Relacionamento',t:'Reclame Aqui',s:'Reclamações, tempo de resposta, índice de solução e reputação.'},
  {id:'crm',grp:'Relacionamento',t:'Régua de comunicação',s:'Disparos de WhatsApp, SMS e e-mail: entrega, leitura e opt-out.'},
+ {id:'meta',grp:'Relacionamento',t:'WhatsApp · Meta API',s:'Custo por categoria, migração de marketing para utilidade e qualidade dos números.'},
  {id:'caas',grp:'Parcerias',t:'Dashboards de parceria',s:'Visão que cada administradora parceira recebe: quatro simulações com comportamentos diferentes.'},
+ {id:'adms',grp:'Parcerias',t:'Central de administradoras',s:'Ranking das administradoras com nota composta de conversão, prazo, NPS, cancelamento e reclamações.'},
+ {id:'assess',grp:'Parcerias',t:'Assessorias',s:'Funil e volume das assessorias que enviam cotas ao autosserviço.'},
  {id:'sobre',grp:'Sobre',t:'Como foi construído',s:'Arquitetura, fontes e decisões por trás dos painéis.'}
 ];
 const noFilterPages={caas:1,sobre:1};
@@ -344,7 +358,7 @@ function render(){
   document.getElementById('pgTitle').textContent=P.t; document.getElementById('pgSub').textContent=P.s;
   buildNav(); buildSlicers();
   for(const k in CH){CH[k].destroy();delete CH[k]}
-  ({exec:pExec,funil:pFunil,pag:pPag,safra:pSafra,cx:pCx,crm:pCrm,caas:pCaas,sobre:pSobre})[S.page]();
+  ({exec:pExec,daily:pDaily,funil:pFunil,pag:pPag,transf:pTransf,cancel:pCancel,pend:pPend,safra:pSafra,metas:pMetas,precos:pPrecos,grandes:pGrandes,perfil:pPerfil,grupos:pGrupos,cx:pCx,atend:pAtend,ra:pRa,crm:pCrm,meta:pMeta,caas:pCaas,adms:pAdms,assess:pAssess,sobre:pSobre})[S.page]();
 }
 
 /* ---------- 1. Visão executiva ---------- */
@@ -597,12 +611,386 @@ function pSobre(){
       <div class="step"><b>Painéis em Apps Script</b><span>Torre de Controle interna e um painel por administradora parceira, com perfis de acesso.</span></div>
     </div></section>
   <section class="card c7"><div class="ch"><div><h3>Sobre este portfólio</h3></div></div>
-    <div class="prose"><p>Este é um portfólio navegável inspirado nos painéis que construo no dia a dia: a Torre de Controle, usada pela operação para acompanhar fechamento, pagamento, funil e experiência do cliente, e os dashboards entregues a cada administradora parceira.</p>
+    <div class="prose"><p>Este é um portfólio navegável inspirado nos painéis que construo no dia a dia: a Torre de Controle, usada pela operação para acompanhar fechamento, pagamento, transferências, cancelamentos, pendências, metas, precificação, atendimento, Reclame Aqui e WhatsApp, e os dashboards entregues a cada administradora parceira.</p>
     <p>Para poder mostrar o trabalho, todos os números foram gerados por simulação, com comportamento parecido com o real (sazonalidade semanal, prazos de pagamento, safras que amadurecem). Administradoras, parceiros e clientes têm nomes genéricos.</p>
     <p>Navegue pelas páginas à esquerda, use os filtros do topo e clique nos gráficos para filtrar os outros visuais, como num relatório de BI.</p></div></section>
   <section class="card c5"><div class="ch"><div><h3>O que dá para explorar</h3></div></div>
-    <div class="tablewrap"><table><tbody>${[['Páginas','8'],['Cotas fechadas simuladas',int(FECH.length)],['Dias de histórico',int(N)],['Respostas de NPS',int(NPS.length)],['Mensagens de CRM',int(CRM.reduce((a,r)=>a+r.env,0))],['Parcerias simuladas','4']].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div></section>
+    <div class="tablewrap"><table><tbody>${[['Páginas',String(PAGES.length)],['Cotas fechadas simuladas',int(FECH.length)],['Dias de histórico',int(N)],['Respostas de NPS',int(NPS.length)],['Mensagens de CRM',int(CRM.reduce((a,r)=>a+r.env,0))],['Parcerias simuladas','4'],['Cancelamentos simulados',int(CANC.length)],['Reclamações simuladas',int(RA.length)],['Preços gerados',int(PRECO.reduce((a,r)=>a+r.gen,0))]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table></div></section>
   </div>`;
+}
+
+/* ===================== PÁGINAS ADICIONAIS · dados simulados ===================== */
+const R2=rng(7782026);
+const hr=(i,s)=>{let x=Math.imul(i^0x9E3779B9,0x85EBCA6B)^Math.imul(s+1,0xC2B2AE35);x^=x>>>13;x=Math.imul(x,0x27D4EB2F);x^=x>>>15;return(x>>>0)/4294967296};
+const fakeId=(i,s)=>String(30000000+Math.floor(hr(i,s)*69999999));
+const dLabel=t=>{const d=dt(t);return String(d.getUTCDate()).padStart(2,'0')+'/'+String(d.getUTCMonth()+1).padStart(2,'0')};
+const dFull=t=>dLabel(t)+'/'+dt(t).getUTCFullYear();
+const okA=r=>S.adm<0||r.a===S.adm;
+const sumK=(arr,k)=>arr.reduce((a,r)=>a+(typeof k==='function'?k(r):r[k]),0);
+const kpiRow=(kp,cls)=>`<div class="kpis ${cls||''}">${kp.map(k=>`<div class="kpi"><span class="l">${k[0]}</span><span class="v">${k[1]}</span><span class="d">${k[2]||''}</span></div>`).join('')}</div>`;
+const tableH=(head,rows,attrs)=>`<div class="tablewrap" ${attrs||''}><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+const pill=(txt,c)=>`<span class="pill"><i style="background:var(${c})"></i>${txt}</span>`;
+const legendTop={display:true,position:'top',align:'start',labels:{boxWidth:10,boxHeight:10}};
+function weeksIn([a,b]){const w=[];for(let t=a;t<=b;t+=7)w.push([t,Math.min(b,t+6)]);return w}
+function keysFor(R0){const long=R0[1]-R0[0]>120;return{long,keys:long?monthsIn(R0):Array.from({length:R0[1]-R0[0]+1},(_,i)=>R0[0]+i),key:t=>long?mKey(t):t,lab:k=>long?mLabel(k):dLabel(k)}}
+const stack=(labels,sets,extra)=>({type:'bar',data:{labels,datasets:sets},options:Object.assign({plugins:{legend:legendTop},scales:{x:{stacked:true,grid:{display:false},ticks:{maxTicksLimit:14}},y:{stacked:true}}},extra||{})});
+const clickAdm=list=>(e,els)=>{if(els[0]){const i=list[els[0].index].i;S.adm=S.adm===i?-1:i;setTimeout(render,0)}};
+
+/* ---------- datasets ---------- */
+// transferência: data entre a assinatura e o pagamento
+FECH.forEach((r,i)=>{r.id=i;const f=.25+.35*hr(i,1);r.tt=r.tp!=null?r.t+Math.max(1,Math.round(r.prazo*f)):r.t+Math.max(1,Math.round(PRAZO[r.p]*(.3+.9*hr(i,2))))});
+// cancelamentos
+const MOT_C=['Desistência do cliente','Proposta expirada','Divergência cadastral','Documentação incompleta','Solicitação da administradora','Duplicidade'];
+const MOT_CW=[.31,.22,.15,.13,.12,.07];
+const POR_C=['Cliente','Administradora','Plataforma'];
+const CANC=[];
+for(let t=0;t<N;t++){const g=growth(t)*wday(t);for(let a=0;a<8;a++){const n=sround(.95*g*AW[a]*(.7+.6*R2())*(a===3?1.35:1));for(let i=0;i<n;i++){let r=R2(),m=0;while(m<5&&r>MOT_CW[m]){r-=MOT_CW[m];m++}const por=m===4?1:m===5?2:R2()<.78?0:R2()<.5?1:2;const st=R2();CANC.push({t,a,p:Math.floor(R2()*6),m,por,st:st<.55?0:st<.85?1:2,credito:Math.round(42e3*Math.exp((R2()+R2()-1)*.6)/100)*100})}}}
+const ST_C=['Hot','Closing','Sem registro'];
+// pendências
+const MOT_P=['Assinatura pendente','Dados bancários','Documento ilegível','Divergência de titularidade','Aguardando administradora','Reconhecimento de firma'];
+const MOT_PW=[.27,.21,.17,.14,.13,.08];
+const PEND=[];
+for(let t=Math.max(0,N-150);t<N;t++){const g=growth(t)*wday(t);for(let a=0;a<8;a++){const n=sround(3.4*g*AW[a]*(.7+.6*R2()));for(let i=0;i<n;i++){let r=R2(),m=0;while(m<5&&r>MOT_PW[m]){r-=MOT_PW[m];m++}const s=R2();const st=s<.38?0:s<.8?1:2;const dur=Math.round(-Math.log(1-R2()*.999)*(11+m*3));const tr=t+dur<=N-1?t+dur:null;PEND.push({id:PEND.length,t,a,p:Math.floor(R2()*6),m,st,tr})}}}
+const ST_P=['Hot','Closing','Pago'];
+// preços
+const MOT_D=['Deságio acima do limite','Grupo encerrando','Crédito abaixo do mínimo','% pago insuficiente','Fundo sem apetite','Duplicado'];
+const MOT_DW=[.29,.2,.16,.15,.12,.08];
+const PRECO=[];
+for(let t=0;t<N;t++){const g=growth(t)*wday(t);for(let a=0;a<8;a++)for(let m=0;m<3;m++){const gen=sround(38*g*AW[a]*[.6,.27,.13][m]*(.8+.4*R2()));if(!gen)continue;const apr=sround(gen*(.62+.08*t/N+(a===2?.06:a===6?-.08:0))*(.92+.16*R2()));const desc=gen-apr;const mot=MOT_DW.map(w=>0);for(let i=0;i<desc;i++){let r=R2(),k=0;while(k<5&&r>MOT_DW[k]){r-=MOT_DW[k];k++}mot[k]++}const ver=sround(apr*(.11-.05*t/N)*(.7+.6*R2()));PRECO.push({t,a,m,gen,apr,desc,mot,ver,desag:[.268,.205,.312][m]*(1+.08*Math.sin(t/60))*(.95+.1*R2())*AV[a]})}}
+// cotas grandes em hot (pipeline para contato)
+const HOTS=['H1 · Não acessou','H2 · Visualizou','H3 · Preencheu','H4 · Gerou contrato'];
+const GH=[];for(let i=0;i<340;i++){const a=(()=>{let r=R2(),k=0;while(k<7&&r>AW[k]){r-=AW[k];k++}return k})();const st=R2();GH.push({id:i,a,p:Math.floor(R2()*6),m:R2()<.62?0:R2()<.7?1:2,credito:Math.round((100e3+340e3*Math.pow(R2(),2.2))/1000)*1000,h:st<.46?0:st<.72?1:st<.88?2:3,dias:Math.floor(R2()*45),preco:R2()<.74,grupo:String(1000+Math.floor(R2()*900)),cota:String(Math.floor(R2()*800)+1).padStart(4,'0')})}
+// perfis de cota
+const PERFIS=['P1 · até R$ 25 mil','P2 · R$ 25–45 mil','P3 · R$ 45–70 mil','P4 · R$ 70–100 mil','P5 · acima de R$ 100 mil'];
+const perfilOf=c=>c<25e3?0:c<45e3?1:c<70e3?2:c<100e3?3:4;
+// grupos de consórcio
+const GRUPOS=[];ADMS.forEach((n,a)=>{const k=Math.round(14+40*AW[a]*4);for(let i=0;i<k;i++){const vag=R2()<.35?0:Math.floor(R2()*R2()*60)+1;const fim=N-1+Math.round((R2()*R2()*72-4)*30.4);GRUPOS.push({a,cod:String(1000+Math.floor(hr(a*97+i,7)*8999)),vag,cotas:Math.floor(20+R2()*380),ativas:0,fim,bem:R2()<.58?'Imóvel':R2()<.8?'Veículo':'Serviços'})}});
+// atendimento
+const MOT_A=['Status da proposta','Valor da proposta','Pagamento','Documentos','Cancelamento','Outros'];
+const MOT_AW=[.29,.21,.18,.14,.1,.08];
+const HOUR_W=[0,0,0,0,0,0,.2,.6,1.4,2.2,2.5,2.4,1.6,1.9,2.4,2.5,2.2,1.8,1.2,.8,.6,.4,.2,.05];
+const AGENTES=['Atendente 1','Atendente 2','Atendente 3','Atendente 4','Atendente 5','Atendente 6'];
+const ATD2=ATD.map((r,i)=>({t:r.t,a:r.a,at:r.at,tr:r.tr,tma:(9.5-2.2*r.t/N)*(.85+.3*hr(i,3)),tmr:(14-8.5*r.t/N)*(.7+.6*hr(i,4)),sla:Math.min(.995,(.86+.09*r.t/N)*(.97+.06*hr(i,5)))}));
+// Reclame Aqui
+const MOT_R=['Demora no pagamento','Valor da proposta','Atendimento','Cancelamento da cota','Documentação','Segurança / suspeita de golpe'];
+const MOT_RW=[.3,.22,.16,.14,.1,.08];
+const RA=[];for(let t=0;t<N;t++){const lam=.42*growth(t)*(1.25-.55*t/N);let n=0;let l=Math.exp(-lam),p=1;do{n++;p*=R2()}while(p>l);n--;for(let i=0;i<n;i++){let r=R2(),m=0;while(m<5&&r>MOT_RW[m]){r-=MOT_RW[m];m++}const a=(()=>{let x=R2(),k=0;while(k<7&&x>AW[k]){x-=AW[k];k++}return k})();const resp=R2()<.985;const h=resp?Math.max(1,(46-30*t/N)*Math.exp((R2()-.5)*1.1)):null;const res=resp&&R2()<.72+.16*t/N;RA.push({id:RA.length,t,a,m,resp,h,res,nota:res?Math.min(10,Math.round(6.5+R2()*4)):Math.round(R2()*6),volta:res&&R2()<.8})}}
+// WhatsApp · Meta API (migração marketing → utilidade)
+const WA_CAT=['Marketing','Utilidade','Serviço','Autenticação'];
+const WA_PRICE=[.35,.045,0,.17];
+const MIG0=Math.round((Date.UTC(2025,5,1)-START)/DAY), MIG1=Math.round((Date.UTC(2026,0,15)-START)/DAY);
+const WA=[];for(let t=0;t<N;t++){const g=growth(t)*wday(t);const u=t<MIG0?0:Math.min(1,(t-MIG0)/(MIG1-MIG0));const tot=2600*g*(.88+.24*R2());const util=.16+.58*u,mkt=.74-.58*u;WA.push({t,c:[tot*mkt,tot*util,tot*.08,tot*.02].map(x=>sround(x)),lid:.47+.12*u,opt:sround(tot*mkt*.009*(.7+.6*R2()))})}
+const NUMS=[{n:'Número principal',q:'Alta',lim:'100 mil/dia'},{n:'Número de cobrança',q:'Alta',lim:'10 mil/dia'},{n:'Número de campanhas',q:'Média',lim:'10 mil/dia'}];
+// assessorias
+const ASSES=['Assessoria 1','Assessoria 2','Assessoria 3','Assessoria 4','Assessoria 5'];
+const ASW=[.27,.23,.2,.17,.13], ASC=[1.08,.96,1.12,.88,1.0];
+const ASS=[];for(let t=0;t<N;t++){const g=growth(t)*wday(t);for(let s=0;s<5;s++){const env=sround(70*g*ASW[s]*(.8+.4*R2()));if(!env)continue;const ac=sround(env*.55*(.9+.2*R2())),ge=sround(ac*.63*ASC[s]*(.9+.2*R2())),cl=sround(ge*.62*(.9+.2*R2())),co=sround(cl*.98),tr=sround(co*.94*(.95+.1*R2())),pg=sround(tr*.96);ASS.push({t,s,env,ac,ge,cl,co,tr,pg,cred:env*46e3*(.9+.2*R2()),pk:[9,10,14,15,16][s]})}}
+
+/* ---------- Daily ---------- */
+function pDaily(){
+  const R0=range(), D=R0[1], s=SER();
+  const day=t=>{const e=ENV.filter(r=>okAP(r)&&r.t===t),f=FECH.filter(r=>okF(r)&&r.t===t),p=FECH.filter(r=>okF(r)&&r.tp===t);return{lib:sumK(e,'env'),vis:sumK(e,'vis'),fec:f.length,cf:sumK(f,'credito'),pag:p.length,cp:sumK(p,'credito'),can:CANC.filter(r=>okA(r)&&r.t===t).length,atd:sumK(ATD.filter(r=>okA(r)&&r.t===t),'at')}};
+  const cur=day(D), prev=day(D-1), avg=[7,14,21,28].map(k=>day(D-k)).reduce((a,x)=>{for(const k in x)a[k]=(a[k]||0)+x[k]/4;return a},{});
+  const M=[['Propostas liberadas','lib',int],['Propostas visualizadas','vis',int],['Cotas fechadas','fec',int],['Crédito fechado','cf',brl],['Cotas pagas','pag',int],['Crédito pago','cp',brl],['Cancelamentos','can',int,1],['Atendimentos no chat','atd',int]];
+  const dlt=(a,b,inv)=>{if(!b)return'<span class="hint">–</span>';const d=(a-b)/b,good=inv?d<0:d>0;return`<span class="${good?'up':'dn'}">${d>=0?'▲':'▼'} ${nf1.format(Math.abs(d)*100)}%</span>`};
+  const last=Array.from({length:30},(_,i)=>D-29+i);
+  const fq=last.map(t=>FECH.filter(r=>okF(r)&&r.t===t).length);
+  const byA=ADMS.map((n,i)=>{const f=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&r.t===D),p=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&r.tp===D),pe=PEND.filter(r=>r.a===i&&r.t<=D&&(r.tr==null||r.tr>D));const f7=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&r.t>D-7&&r.t<=D).length/7;return{n,i,f:f.length,cf:sumK(f,'credito'),p:p.length,pe:pe.length,f7}});
+  const wd=['domingo','segunda','terça','quarta','quinta','sexta','sábado'][dt(D).getUTCDay()];
+  document.getElementById('page').innerHTML=`
+  <div class="hint" style="margin-bottom:10px">Dia de referência: <b>${dFull(D)} · ${wd}</b> (último dia do período selecionado). Comparação com o dia anterior e com a média das últimas 4 ${wd}s.</div>
+  ${kpiRow([['Cotas fechadas',int(cur.fec),dlt(cur.fec,avg.fec)+' vs média'],['Crédito fechado',brl(cur.cf),dlt(cur.cf,avg.cf)+' vs média'],['Cotas pagas',int(cur.pag),dlt(cur.pag,avg.pag)+' vs média'],['Crédito pago',brl(cur.cp),dlt(cur.cp,avg.cp)+' vs média'],['Visualizações',int(cur.vis),dlt(cur.vis,avg.vis)+' vs média'],['Cancelamentos',int(cur.can),dlt(cur.can,avg.can,1)+' vs média']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c5','Resumo da reunião diária','Indicadores do dia contra ontem e contra a média do mesmo dia da semana',null,null,tableH(['Indicador','Dia','Ontem','Média 4 sem.','Δ média'],M.map(([l,k,f,inv])=>`<tr><td>${l}</td><td><b>${f(cur[k])}</b></td><td>${f(prev[k])}</td><td>${f(avg[k])}</td><td>${dlt(cur[k],avg[k],inv)}</td></tr>`)))}
+    ${card('c7','Cotas fechadas nos últimos 30 dias','Barra destacada = dia de referência · fins de semana mais baixos','cDailyF','tall')}
+    ${card('c12','Pauta por administradora','Fechamento e pagamento do dia, ritmo da semana e pendências abertas · clique numa linha para filtrar',null,null,tableH(['Administradora','Fechadas no dia','Crédito fechado','Pagas no dia','Média diária 7d','Pendências abertas','Sinal'],byA.map(x=>{const sig=x.f>=x.f7*1.1?pill('Acima do ritmo','--good'):x.f>=x.f7*.75?pill('No ritmo','--warn'):pill('Abaixo do ritmo','--crit');return`<tr class="click ${S.adm===x.i?'sel':''}" data-adm="${x.i}"><td>${x.n}</td><td>${int(x.f)}</td><td>${brl(x.cf)}</td><td>${int(x.p)}</td><td>${nf1.format(x.f7)}</td><td>${int(x.pe)}</td><td>${sig}</td></tr>`})))}
+  </div>`;
+  chart('cDailyF',{type:'bar',data:{labels:last.map(dLabel),datasets:[bar4({label:'Cotas fechadas',data:fq,backgroundColor:last.map(t=>t===D?s[1]:s[0]),maxBarThickness:18})]},options:{scales:{x:{grid:{display:false},ticks:{maxTicksLimit:10}},y:{ticks:{callback:v=>int(v)}}}}},{head:['Dia','Cotas fechadas'],rows:last.map((t,i)=>[dFull(t),int(fq[i])])});
+}
+
+/* ---------- Transferências ---------- */
+function pTransf(){
+  const R0=range(), E=R0[1], s=SER();
+  const F=FECH.filter(r=>okF(r)&&inR(r.t,R0));
+  const stOf=r=>r.tp!=null&&r.tp<=E?2:r.tt<=E?1:0;
+  const ag=[0,1,2].map(k=>F.filter(r=>stOf(r)===k));
+  const pagas=ag[2], noPz=pagas.filter(r=>r.prazo<=21).length;
+  const tTr=pagas.length?sumK(pagas,r=>r.tt-r.t)/pagas.length:0;
+  const byA=ADMS.map((n,i)=>{const x=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&(S.mod<0||r.m===S.mod)&&inR(r.t,R0));const pg=x.filter(r=>stOf(r)===2);const np=pg.filter(r=>r.prazo<=21).length;return{n,i,q:x.length,np,fp:pg.length-np,tr:pg.length?sumK(pg,r=>r.tt-r.t)/pg.length:0,pz:pg.length?sumK(pg,'prazo')/pg.length:0,at:x.filter(r=>stOf(r)===0).length,ap:x.filter(r=>stOf(r)===1).length}});
+  const pend=F.filter(r=>stOf(r)<2).map(r=>({...r,age:E-r.t})).sort((a,b)=>b.age-a.age).slice(0,14);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Aguardando transferência',int(ag[0].length),brl(sumK(ag[0],'credito'))],['Aguardando pagamento',int(ag[1].length),brl(sumK(ag[1],'credito'))],['Pagas',int(pagas.length),brl(sumK(pagas,'credito'))],['Pagas no prazo',pct(pagas.length?noPz/pagas.length:0),'até 21 dias da assinatura'],['Assinatura → transferência',nf1.format(tTr)+' d','média das pagas'],['Cotas no período',int(F.length),'por data de assinatura']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c7','% no prazo × fora do prazo por administradora','Cotas pagas no período · clique para filtrar','cTrPz','tall')}
+    ${card('c5','Tempo médio por etapa','Dias da assinatura até a transferência e da transferência até o pagamento','cTrT','tall')}
+    ${card('c12','Contratos pendentes mais antigos','Números de contrato fictícios · ação recomendada pela etapa e pelo tempo parado',null,null,tableH(['Contrato','Administradora','Parceiro','Assinatura','Dias parado','Etapa','Ação'],pend.map(r=>{const st=stOf(r);const act=st===0?(r.age>15?pill('Cobrar comprador','--crit'):pill('Acompanhar','--warn')):(r.age>21?pill('Escalar pagamento','--crit'):pill('Acompanhar','--warn'));return`<tr><td style="font-family:var(--f-mono)">${fakeId(r.id,11)}</td><td>${ADMS[r.a]}</td><td>${PARS[r.p]}</td><td>${dFull(r.t)}</td><td>${r.age} d</td><td>${st===0?'Aguardando transferência':'Aguardando pagamento'}</td><td>${act}</td></tr>`})))}
+  </div>`;
+  const sorted=[...byA].sort((a,b)=>(b.np/(b.np+b.fp||1))-(a.np/(a.np+a.fp||1)));
+  chart('cTrPz',{type:'bar',data:{labels:sorted.map(x=>x.n),datasets:[bar4({label:'No prazo',data:sorted.map(x=>x.np/(x.np+x.fp||1)),backgroundColor:s[2],borderSkipped:false,borderRadius:2}),bar4({label:'Fora do prazo',data:sorted.map(x=>x.fp/(x.np+x.fp||1)),backgroundColor:s[1],borderSkipped:false,borderRadius:2})]},options:{indexAxis:'y',onClick:clickAdm(sorted),plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.label+': '+pct(c.raw)}}},scales:{x:{stacked:true,max:1,ticks:{callback:v=>pct(v,0)}},y:{stacked:true,grid:{display:false}}}}},
+    {head:['Administradora','No prazo','Fora do prazo','% no prazo','Prazo médio'],rows:sorted.map(x=>[x.n,int(x.np),int(x.fp),pct(x.np/(x.np+x.fp||1)),nf1.format(x.pz)+' d'])});
+  chart('cTrT',{type:'bar',data:{labels:byA.map(x=>x.n),datasets:[bar4({label:'Assinatura → transferência',data:byA.map(x=>x.tr),backgroundColor:s[0],borderSkipped:false,borderRadius:2}),bar4({label:'Transferência → pagamento',data:byA.map(x=>Math.max(0,x.pz-x.tr)),backgroundColor:s[3],borderSkipped:false,borderRadius:2})]},options:{plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.label+': '+nf1.format(c.raw)+' d'}}},scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:45,minRotation:45}},y:{stacked:true,ticks:{callback:v=>v+' d'}}}}},
+    {head:['Administradora','Até transferência','Até pagamento','Aguard. transf.','Aguard. pagto.'],rows:byA.map(x=>[x.n,nf1.format(x.tr)+' d',nf1.format(x.pz)+' d',int(x.at),int(x.ap)])});
+}
+
+/* ---------- Cancelamentos ---------- */
+function pCancel(){
+  const R0=range(), s=SER(), {long,keys,key,lab}=keysFor(R0);
+  const C=CANC.filter(r=>okAP(r)&&inR(r.t,R0)); const F=FECH.filter(r=>okF(r)&&inR(r.t,R0)).length;
+  const byM=MOT_C.map((_,m)=>keys.map(k=>C.filter(r=>r.m===m&&key(r.t)===k).length));
+  const cred=keys.map(k=>sumK(C.filter(r=>key(r.t)===k),'credito'));
+  const mot=MOT_C.map((n,m)=>({n,q:C.filter(r=>r.m===m).length,c:sumK(C.filter(r=>r.m===m),'credito')})).sort((a,b)=>b.q-a.q);
+  const byA=ADMS.map((n,i)=>{const x=CANC.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&inR(r.t,R0));const f=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&inR(r.t,R0)).length;return{n,i,q:x.length,tx:x.length/(x.length+f||1),c:sumK(x,'credito')}}).sort((a,b)=>b.tx-a.tx);
+  const por=POR_C.map((n,j)=>C.filter(r=>r.por===j).length), st=ST_C.map((n,j)=>C.filter(r=>r.st===j).length);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Cotas canceladas',int(C.length),'no período'],['Crédito cancelado',brl(sumK(C,'credito')),''],['Taxa de cancelamento',pct(C.length/(C.length+F||1)),'canceladas ÷ (canceladas + fechadas)'],['Principal motivo',pct(mot[0].q/(C.length||1),0),mot[0].n],['Pelo cliente',pct(por[0]/(C.length||1),0),'do total'],['Ainda em Hot',pct(st[0]/(C.length||1),0),'antes de assinar']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c8',long?'Cancelamentos por mês e motivo':'Cancelamentos por dia e motivo','Motivo registrado no sistema operacional','cCanM','tall')}
+    ${card('c4','Motivos','Volume e crédito por motivo',null,null,tableH(['Motivo','Cotas','Crédito'],mot.map(x=>`<tr><td>${x.n}</td><td>${int(x.q)}</td><td>${brl(x.c)}</td></tr>`)))}
+    ${card('c6','Taxa de cancelamento por administradora','Clique numa barra para filtrar','cCanA')}
+    ${card('c6',long?'Crédito cancelado por mês':'Crédito cancelado por dia','Soma do crédito das cotas canceladas','cCanC')}
+    ${card('c6','Quem cancelou','Origem do cancelamento','cCanP',null)}
+    ${card('c6','Etapa da cota no cancelamento','Status no funil quando a cota foi cancelada','cCanS',null)}
+  </div>`;
+  chart('cCanM',stack(keys.map(lab),MOT_C.map((m,j)=>bar4({label:m,data:byM[j],backgroundColor:s[j],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:12}))),{head:[long?'Mês':'Dia',...MOT_C],rows:keys.map((k,i)=>[lab(k),...MOT_C.map((m,j)=>int(byM[j][i]))])});
+  chart('cCanA',{type:'bar',data:{labels:byA.map(x=>x.n),datasets:[bar4({label:'Taxa',data:byA.map(x=>x.tx),backgroundColor:byA.map(x=>S.adm<0||S.adm===x.i?s[1]:css('--q2'))})]},options:{indexAxis:'y',onClick:clickAdm(byA),scales:{x:{ticks:{callback:v=>pct(v,0)}},y:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>pct(c.raw)+' · '+int(byA[c.dataIndex].q)+' cotas'}}}}},{head:['Administradora','Canceladas','Taxa','Crédito'],rows:byA.map(x=>[x.n,int(x.q),pct(x.tx),brl(x.c)])});
+  chart('cCanC',{type:'line',data:{labels:keys.map(lab),datasets:[{label:'Crédito cancelado',data:cred,borderColor:s[1],backgroundColor:s[1]+'22',fill:true,borderWidth:2,pointRadius:long?3:0,tension:.3}]},options:{scales:{y:{ticks:{callback:v=>brl(v)}},x:{grid:{display:false},ticks:{maxTicksLimit:12}}},plugins:{tooltip:{callbacks:{label:c=>brl(c.raw)}}}}},{head:[long?'Mês':'Dia','Crédito'],rows:keys.map((k,i)=>[lab(k),brl(cred[i])])});
+  chart('cCanP',{type:'doughnut',data:{labels:POR_C,datasets:[{data:por,backgroundColor:[s[0],s[3],s[5]],borderColor:css('--panel'),borderWidth:2}]},options:{cutout:'62%',plugins:{legend:{display:true,position:'right'}}}},{head:['Origem','Cotas'],rows:POR_C.map((n,j)=>[n,int(por[j])])});
+  chart('cCanS',{type:'doughnut',data:{labels:ST_C,datasets:[{data:st,backgroundColor:[s[1],s[0],css('--q2')],borderColor:css('--panel'),borderWidth:2}]},options:{cutout:'62%',plugins:{legend:{display:true,position:'right'}}}},{head:['Etapa','Cotas'],rows:ST_C.map((n,j)=>[n,int(st[j])])});
+}
+
+/* ---------- Pendências ---------- */
+function pPend(){
+  const E=range()[1], s=SER();
+  const open=PEND.filter(r=>okAP(r)&&r.t<=E&&(r.tr==null||r.tr>E));
+  const res30=PEND.filter(r=>okAP(r)&&r.tr!=null&&r.tr<=E&&r.tr>E-30);
+  const mot=MOT_P.map((n,m)=>({n,q:open.filter(r=>r.m===m).length})).sort((a,b)=>b.q-a.q);
+  const byA=ADMS.map((n,i)=>({n,i,st:[0,1,2].map(k=>open.filter(r=>r.a===i&&r.st===k).length)}));
+  const bins=['0–2 d','3–7 d','8–15 d','16–30 d','31+ d'], cut=[2,7,15,30,1e9];
+  const ag=bins.map((_,j)=>open.filter(r=>{const d=E-r.t;return d<=cut[j]&&(j===0||d>cut[j-1])}).length);
+  const tRes=res30.length?sumK(res30,r=>r.tr-r.t)/res30.length:0;
+  const top=[...open].sort((a,b)=>a.t-b.t).slice(0,12);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Pendências abertas',int(open.length),'na data de referência'],['Resolvidas · 30 dias',int(res30.length),''],['Tempo médio de resolução',nf1.format(tRes)+' d','resolvidas nos últimos 30 dias'],['Mais de 15 dias',int(ag[3]+ag[4]),pct((ag[3]+ag[4])/(open.length||1),0)+' das abertas'],['Principal motivo',int(mot[0].q),mot[0].n],['Em cotas já pagas',int(open.filter(r=>r.st===2).length),'pós-venda']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c5','Top motivos de pendência','Pendências abertas','cPenM','tall')}
+    ${card('c7','Volume por administradora e etapa','Hot = antes da assinatura · Closing = assinada · Pago = pós-pagamento · clique para filtrar','cPenA','tall')}
+    ${card('c5','Tempo em aberto','Dias desde a abertura da pendência','cPenG')}
+    ${card('c7','Pendências mais antigas','Contratos fictícios · ordem de abertura',null,null,tableH(['Contrato','Administradora','Motivo','Etapa','Aberta em','Dias'],top.map(r=>`<tr><td style="font-family:var(--f-mono)">${fakeId(r.id,21)}</td><td>${ADMS[r.a]}</td><td>${MOT_P[r.m]}</td><td>${ST_P[r.st]}</td><td>${dFull(r.t)}</td><td>${E-r.t} d</td></tr>`),'style="max-height:300px"'))}
+  </div>`;
+  chart('cPenM',{type:'bar',data:{labels:mot.map(x=>x.n),datasets:[bar4({label:'Pendências',data:mot.map(x=>x.q),backgroundColor:s[0]})]},options:{indexAxis:'y',scales:{y:{grid:{display:false}}}}},{head:['Motivo','Abertas'],rows:mot.map(x=>[x.n,int(x.q)])});
+  chart('cPenA',{type:'bar',data:{labels:byA.map(x=>x.n),datasets:ST_P.map((n,k)=>bar4({label:n,data:byA.map(x=>x.st[k]),backgroundColor:[s[1],s[0],s[2]][k],borderSkipped:false,borderRadius:2}))},options:{onClick:clickAdm(byA),plugins:{legend:legendTop},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true}}}},{head:['Administradora',...ST_P],rows:byA.map(x=>[x.n,...x.st.map(int)])});
+  chart('cPenG',{type:'bar',data:{labels:bins,datasets:[bar4({label:'Pendências',data:ag,backgroundColor:ag.map((_,j)=>j>=3?css('--crit'):j===2?css('--warn'):s[0])})]},options:{scales:{x:{grid:{display:false}}}}},{head:['Tempo','Abertas'],rows:bins.map((b,j)=>[b,int(ag[j])])});
+}
+
+/* ---------- Metas ---------- */
+function pMetas(){
+  const R0=range(), s=SER(), months=monthsIn(R0);
+  const sh=(S.adm>=0?AW[S.adm]:1)*(S.par>=0?PW[S.par]:1);
+  const ticket=FECH.reduce((a,r)=>a+r.credito,0)/FECH.length;
+  const M=months.map(k=>{const f=FECH.filter(r=>okF(r)&&mKey(r.t)===k),p=FECH.filter(r=>okF(r)&&r.tp!=null&&mKey(r.tp)===k),e=ENV.filter(r=>okAP(r)&&mKey(r.t)===k);const env=sumK(e,'env'),vis=sumK(e,'vis');const meta=META_MES(k)*sh;return{k,pc:sumK(p,'credito'),meta,fq:f.length,mq:meta/ticket*.98,conv:vis?f.length/vis:0,vis:env?vis/env:0}});
+  const kc=mKey(R0[1]), y=Math.floor(kc/12), sem=kc%12<6?0:1, semK=Array.from({length:6},(_,i)=>y*12+sem*6+i).filter(k=>k<=kc);
+  const SM=semK.map(k=>{const p=FECH.filter(r=>okF(r)&&r.tp!=null&&mKey(r.tp)===k),f=FECH.filter(r=>okF(r)&&mKey(r.t)===k);return{pc:sumK(p,'credito'),fq:f.length,meta:META_MES(k)*sh}});
+  const semMeta=Array.from({length:6},(_,i)=>META_MES(y*12+sem*6+i)*sh).reduce((a,b)=>a+b,0);
+  const semReal=SM.reduce((a,x)=>a+x.pc,0), semQ=SM.reduce((a,x)=>a+x.fq,0), semQm=semMeta/ticket*.98;
+  const prog=(l,real,meta,fmt)=>{const r=real/meta;const c=r>=.95?'--good':r>=.75?'--warn':'--crit';return`<div class="kpi"><span class="l">${l}</span><span class="v">${pct(r,0)}</span><span class="d">${fmt(real)} de ${fmt(meta)}</span><div class="meter" style="margin-top:8px"><i style="width:${Math.min(100,r*100)}%;background:var(${c})"></i></div></div>`};
+  const elapsed=semK.length/6;
+  const byA=ADMS.map((n,i)=>{const pc=sumK(FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&(S.mod<0||r.m===S.mod)&&r.tp!=null&&inR(r.tp,R0)),'credito');const meta=months.reduce((a,k)=>a+META_MES(k),0)*AW[i]*(S.par>=0?PW[S.par]:1);return{n,i,pc,meta,r:pc/meta}}).sort((a,b)=>b.r-a.r);
+  document.getElementById('page').innerHTML=`
+  <div class="kpis k4">${prog('Crédito pago · '+(sem?'2º':'1º')+' sem. '+y,semReal,semMeta,brl)}${prog('Cotas fechadas · semestre',semQ,semQm,int)}<div class="kpi"><span class="l">Semestre decorrido</span><span class="v">${pct(elapsed,0)}</span><span class="d">${semK.length} de 6 meses</span><div class="meter" style="margin-top:8px"><i style="width:${elapsed*100}%"></i></div></div><div class="kpi"><span class="l">Projeção no ritmo atual</span><span class="v">${pct(semReal/elapsed/semMeta,0)}</span><span class="d">da meta de crédito pago</span></div></div>
+  <div class="grid" style="margin-top:14px">
+    ${card('c7','Crédito pago · meta × realizado por mês','Barras = realizado · linha = meta','cMetM','tall')}
+    ${card('c5','Atingimento por administradora','Crédito pago no período ÷ meta proporcional · clique para filtrar',null,null,tableH(['Administradora','Realizado','Meta','%'],byA.map(x=>{const c=x.r>=.95?'--good':x.r>=.75?'--warn':'--crit';return`<tr class="click ${S.adm===x.i?'sel':''}" data-adm="${x.i}"><td>${x.n}</td><td>${brl(x.pc)}</td><td>${brl(x.meta)}</td><td>${pill(pct(x.r,0),c)}</td></tr>`}),'style="max-height:330px"'))}
+    ${card('c6','Conversão de visualizadas · meta 1,0%','Fechadas ÷ propostas visualizadas','cMetC')}
+    ${card('c6','Taxa de visualização · meta 13%','Visualizadas ÷ propostas liberadas','cMetV')}
+  </div>`;
+  chart('cMetM',{type:'bar',data:{labels:months.map(mLabel),datasets:[bar4({label:'Realizado',data:M.map(x=>x.pc),backgroundColor:M.map(x=>x.pc>=x.meta?css('--good'):s[0]),order:2}),{type:'line',label:'Meta',data:M.map(x=>x.meta),borderColor:css('--ink-2'),borderDash:[5,4],borderWidth:2,pointRadius:0,order:1}]},options:{plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.label+': '+brl(c.raw)}}},scales:{y:{ticks:{callback:v=>brl(v)}},x:{grid:{display:false}}}}},{head:['Mês','Realizado','Meta','%'],rows:M.map(x=>[mLabel(x.k),brl(x.pc),brl(x.meta),pct(x.pc/x.meta)])});
+  const ln=(k,meta,c)=>({type:'line',data:{labels:months.map(mLabel),datasets:[{label:'Realizado',data:M.map(x=>x[k]),borderColor:c,backgroundColor:c+'22',fill:true,borderWidth:2,pointRadius:3,tension:.3},{label:'Meta',data:M.map(()=>meta),borderColor:css('--crit'),borderDash:[5,4],borderWidth:2,pointRadius:0}]},options:{plugins:{tooltip:{callbacks:{label:c2=>c2.dataset.label+': '+pct(c2.raw,2)}}},scales:{y:{ticks:{callback:v=>pct(v,1)}},x:{grid:{display:false}}}}});
+  chart('cMetC',ln('conv',.01,s[2]),{head:['Mês','Conversão'],rows:M.map(x=>[mLabel(x.k),pct(x.conv,2)])});
+  chart('cMetV',ln('vis',.13,s[0]),{head:['Mês','Visualização'],rows:M.map(x=>[mLabel(x.k),pct(x.vis,1)])});
+}
+
+/* ---------- Preços ---------- */
+function pPrecos(){
+  const R0=range(), s=SER(), {long,keys,key,lab}=keysFor(R0);
+  const P=PRECO.filter(r=>okA(r)&&(S.mod<0||r.m===S.mod)&&inR(r.t,R0));
+  const gen=sumK(P,'gen'),apr=sumK(P,'apr'),desc=sumK(P,'desc'),ver=sumK(P,'ver');
+  const mot=MOT_D.map((n,j)=>({n,q:sumK(P,r=>r.mot[j])})).sort((a,b)=>b.q-a.q);
+  const ap=keys.map(k=>sumK(P.filter(r=>key(r.t)===k),'apr')), de=keys.map(k=>sumK(P.filter(r=>key(r.t)===k),'desc'));
+  const months=monthsIn(R0); const dsg=MODS.map((_,m)=>months.map(k=>{const x=PRECO.filter(r=>okA(r)&&r.m===m&&mKey(r.t)===k);const g=sumK(x,'apr');return g?sumK(x,r=>r.desag*r.apr)/g:null}));
+  const byA=ADMS.map((n,i)=>{const x=PRECO.filter(r=>r.a===i&&(S.mod<0||r.m===S.mod)&&inR(r.t,R0));const g=sumK(x,'gen'),a=sumK(x,'apr');return{n,i,g,a,tx:g?a/g:0,dg:a?sumK(x,r=>r.desag*r.apr)/a:0,ver:a?sumK(x,'ver')/a:0}}).sort((a,b)=>b.g-a.g);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Preços gerados',int(gen),'no período'],['Aprovados',pct(gen?apr/gen:0),int(apr)+' preços'],['Descartados',int(desc),pct(gen?desc/gen:0)+' dos gerados'],['Deságio médio',pct(apr?sumK(P,r=>r.desag*r.apr)/apr:0),'nos aprovados'],['Validação "verificar"',pct(apr?ver/apr:0),'aprovados com alerta'],['Principal descarte',int(mot[0].q),mot[0].n]])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c8',long?'Aprovados × descartados por mês':'Aprovados × descartados por dia','Preços gerados pelo motor de precificação','cPreA','tall')}
+    ${card('c4','Motivos de descarte','Regras de validação que barraram o preço','cPreM','tall')}
+    ${card('c6','Deságio médio por modelo','Desconto sobre o crédito nos preços aprovados','cPreD')}
+    ${card('c6','Por administradora','Clique numa linha para filtrar',null,null,tableH(['Administradora','Gerados','Aprovação','Deságio','Verificar'],byA.map(x=>`<tr class="click ${S.adm===x.i?'sel':''}" data-adm="${x.i}"><td>${x.n}</td><td>${int(x.g)}</td><td>${pct(x.tx,0)}</td><td>${pct(x.dg)}</td><td>${pill(pct(x.ver,0),x.ver>.08?'--warn':'--good')}</td></tr>`)))}
+  </div>`;
+  chart('cPreA',stack(keys.map(lab),[bar4({label:'Aprovados',data:ap,backgroundColor:s[2],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:12}),bar4({label:'Descartados',data:de,backgroundColor:s[1],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:12})]),{head:[long?'Mês':'Dia','Aprovados','Descartados','% aprovação'],rows:keys.map((k,i)=>[lab(k),int(ap[i]),int(de[i]),pct(ap[i]/((ap[i]+de[i])||1),0)])});
+  chart('cPreM',{type:'bar',data:{labels:mot.map(x=>x.n),datasets:[bar4({label:'Descartes',data:mot.map(x=>x.q),backgroundColor:s[1]})]},options:{indexAxis:'y',scales:{y:{grid:{display:false}}}}},{head:['Motivo','Descartes'],rows:mot.map(x=>[x.n,int(x.q)])});
+  chart('cPreD',{type:'line',data:{labels:months.map(mLabel),datasets:MODS.map((m,j)=>({label:m,data:dsg[j],borderColor:s[j],borderWidth:2,pointRadius:2,tension:.3}))},options:{plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.label+': '+pct(c.raw)}}},scales:{y:{ticks:{callback:v=>pct(v,0)}},x:{grid:{display:false}}}}},{head:['Mês',...MODS],rows:months.map((k,i)=>[mLabel(k),...MODS.map((m,j)=>dsg[j][i]==null?'–':pct(dsg[j][i]))])});
+}
+
+/* ---------- Cotas grandes ---------- */
+function pGrandes(){
+  const R0=range(), s=SER(), LIM=100e3;
+  const F=FECH.filter(r=>okF(r)&&inR(r.t,R0)&&r.credito>=LIM);
+  const G=GH.filter(r=>okAP(r)&&(S.mod<0||r.m===S.mod));
+  const byA=ADMS.map((n,i)=>({n,i,c:sumK(G.filter(r=>r.a===i),'credito'),q:G.filter(r=>r.a===i).length,f:sumK(F.filter(r=>r.a===i),'credito')})).sort((a,b)=>b.c-a.c);
+  const hs=HOTS.map((h,j)=>({h,q:G.filter(r=>r.h===j).length,c:sumK(G.filter(r=>r.h===j),'credito')}));
+  const top=[...G].sort((a,b)=>b.h-a.h||b.credito-a.credito).slice(0,14);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Cotas grandes em aberto',int(G.length),'crédito ≥ R$ 100 mil, ainda em Hot'],['Crédito em aberto',brl(sumK(G,'credito')),''],['Com preço calculado',pct(G.filter(r=>r.preco).length/(G.length||1),0),'prontas para oferta'],['Em H3 ou H4',int(G.filter(r=>r.h>=2).length),'mais perto de fechar'],['Fechadas no período',int(F.length),brl(sumK(F,'credito'))],['Ticket das fechadas',F.length?brl(sumK(F,'credito')/F.length):'–','cotas grandes']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c7','Crédito em aberto por administradora','Cotas grandes ainda no funil · clique para filtrar','cGrA','tall')}
+    ${card('c5','Etapa do funil','H1 não acessou · H2 visualizou · H3 preencheu dados · H4 gerou contrato','cGrH','tall')}
+    ${card('c12','Cotas para contato','Prioridade: etapa mais avançada e maior crédito · contratos, grupos e cotas fictícios',null,null,tableH(['Contrato','Administradora','Grupo / cota','Modelo','Crédito','Etapa','Dias desde a liberação','Preço'],top.map(r=>`<tr><td style="font-family:var(--f-mono)">${fakeId(r.id,31)}</td><td>${ADMS[r.a]}</td><td style="font-family:var(--f-mono)">${r.grupo} / ${r.cota}</td><td>${MODS[r.m]}</td><td>${brl(r.credito)}</td><td>${pill(HOTS[r.h],['--q3','--warn','--serious','--good'][r.h])}</td><td>${r.dias} d</td><td>${r.preco?'✓':'—'}</td></tr>`)))}
+  </div>`;
+  chart('cGrA',{type:'bar',data:{labels:byA.map(x=>x.n),datasets:[bar4({label:'Crédito em aberto',data:byA.map(x=>x.c),backgroundColor:byA.map(x=>S.adm<0||S.adm===x.i?s[0]:css('--q2'))})]},options:{indexAxis:'y',onClick:clickAdm(byA),scales:{x:{ticks:{callback:v=>brl(v),maxTicksLimit:5}},y:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>brl(c.raw)+' · '+int(byA[c.dataIndex].q)+' cotas'}}}}},{head:['Administradora','Crédito em aberto','Cotas','Fechado no período'],rows:byA.map(x=>[x.n,brl(x.c),int(x.q),brl(x.f)])});
+  chart('cGrH',{type:'bar',data:{labels:HOTS,datasets:[bar4({label:'Cotas',data:hs.map(x=>x.q),backgroundColor:[css('--q3'),css('--warn'),css('--serious'),css('--good')]})]},options:{scales:{x:{grid:{display:false}}},plugins:{tooltip:{callbacks:{label:c=>int(c.raw)+' cotas · '+brl(hs[c.dataIndex].c)}}}}},{head:['Etapa','Cotas','Crédito'],rows:hs.map(x=>[x.h,int(x.q),brl(x.c)])});
+}
+
+/* ---------- Perfil de cotas ---------- */
+function pPerfil(){
+  const R0=range(), s=SER(), months=monthsIn(R0);
+  const F=FECH.filter(r=>okF(r)&&inR(r.t,R0));
+  const pf=PERFIS.map((n,j)=>{const x=F.filter(r=>perfilOf(r.credito)===j);const pg=x.filter(r=>r.tp!=null);return{n,j,q:x.length,c:sumK(x,'credito'),pz:pg.length?sumK(pg,'prazo')/pg.length:0,np:pg.length?pg.filter(r=>r.prazo<=21).length/pg.length:0}});
+  const mm=PERFIS.map((_,j)=>months.map(k=>F.filter(r=>perfilOf(r.credito)===j&&mKey(r.t)===k).length));
+  const mat=ADMS.map((n,i)=>{const x=FECH.filter(r=>r.a===i&&(S.par<0||r.p===S.par)&&(S.mod<0||r.m===S.mod)&&inR(r.t,R0));return{n,i,v:PERFIS.map((_,j)=>x.length?x.filter(r=>perfilOf(r.credito)===j).length/x.length:0)}});
+  const q=['--q1','--q2','--q3','--q4','--q5','--q6','--q7'];const mx=Math.max(...mat.flatMap(r=>r.v));
+  document.getElementById('page').innerHTML=`
+  ${kpiRow(pf.map(x=>[x.n,int(x.q),brl(x.c)+' · '+pct(x.q/(F.length||1),0)]).concat([['Ticket médio',F.length?brl(sumK(F,'credito')/F.length):'–','cotas fechadas']]))}
+  <div class="grid" style="margin-top:14px">
+    ${card('c7','Cotas fechadas por perfil e mês','Perfil definido pela faixa de crédito da cota','cPfM','tall')}
+    ${card('c5','Comportamento por perfil','Prazo de pagamento e pagamentos no prazo',null,null,tableH(['Perfil','Cotas','Crédito','Prazo médio','No prazo'],pf.map(x=>`<tr><td>${x.n}</td><td>${int(x.q)}</td><td>${brl(x.c)}</td><td>${nf1.format(x.pz)} d</td><td>${pill(pct(x.np,0),x.np>=.85?'--good':x.np>=.7?'--warn':'--crit')}</td></tr>`)))}
+    <section class="card c12"><div class="ch"><div><h3>Mix de perfis por administradora</h3><div class="sub">% das cotas fechadas de cada administradora em cada perfil · clique numa linha para filtrar</div></div></div>
+    <div class="tablewrap"><table class="heat"><thead><tr><th style="text-align:left">Administradora</th>${PERFIS.map(p=>`<th>${p.split(' · ')[0]}</th>`).join('')}</tr></thead><tbody>${mat.map(r=>`<tr class="click ${S.adm===r.i?'sel':''}" data-adm="${r.i}"><td class="lbl">${r.n}</td>${r.v.map(v=>{const i=Math.min(6,Math.floor(v/(mx||1)*6.99));return`<td style="background:var(${q[i]});color:${i>=3?'#fff':'var(--ink)'}">${pct(v,0)}</td>`}).join('')}</tr>`).join('')}</tbody></table></div></section>
+  </div>`;
+  chart('cPfM',stack(months.map(mLabel),PERFIS.map((p,j)=>bar4({label:p.split(' · ')[0],data:mm[j],backgroundColor:s[j],borderSkipped:false,borderRadius:2}))),{head:['Mês',...PERFIS],rows:months.map((k,i)=>[mLabel(k),...PERFIS.map((p,j)=>int(mm[j][i]))])});
+}
+
+/* ---------- Grupos ---------- */
+function pGrupos(){
+  const E=N-1, s=SER(); const G=GRUPOS.filter(okA);
+  const enc=d=>{const x=G.filter(g=>g.fim>=E&&g.fim<=E+d);return x.length};
+  const byA=ADMS.map((n,i)=>{const x=GRUPOS.filter(g=>g.a===i);return{n,i,cv:x.filter(g=>g.vag>0).length,sv:x.filter(g=>g.vag===0).length,vag:sumK(x,'vag'),e90:x.filter(g=>g.fim>=E&&g.fim<=E+90).length}});
+  const mk=Array.from({length:24},(_,i)=>mKey(E)+i); const encM=mk.map(k=>G.filter(g=>g.fim>=E&&mKey(g.fim)===k).length);
+  const det=[...G].filter(g=>g.fim>=E).sort((a,b)=>a.fim-b.fim).slice(0,14);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Grupos ativos',int(G.filter(g=>g.fim>=E).length),'na base'],['Com vagas',int(G.filter(g=>g.vag>0&&g.fim>=E).length),int(sumK(G.filter(g=>g.fim>=E),'vag'))+' vagas'],['Encerram em 30 dias',int(enc(30)),''],['Encerram em 90 dias',int(enc(90)),'atenção na precificação'],['Vencidos',int(G.filter(g=>g.fim<E).length),'data fim já passou'],['Cotas na plataforma',int(sumK(G,'cotas')),'nesses grupos']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c6','Grupos por administradora','Com e sem vagas · clique para filtrar','cGpA','tall')}
+    ${card('c6','Encerramento dos grupos','Grupos que encerram em cada mês, próximos 24 meses','cGpE','tall')}
+    ${card('c12','Grupos encerrando primeiro','Códigos de grupo fictícios',null,null,tableH(['Grupo','Administradora','Bem','Vagas','Cotas na plataforma','Data fim','Situação'],det.map(g=>{const d=g.fim-E;const st=d<0?pill('Vencido','--crit'):d<=30?pill('Encerra em '+d+' d','--crit'):d<=90?pill('Encerra em '+d+' d','--warn'):pill('Ativo','--good');return`<tr><td style="font-family:var(--f-mono)">${g.cod}</td><td>${ADMS[g.a]}</td><td>${g.bem}</td><td>${g.vag}</td><td>${int(g.cotas)}</td><td>${dFull(g.fim)}</td><td>${st}</td></tr>`})))}
+  </div>`;
+  chart('cGpA',{type:'bar',data:{labels:byA.map(x=>x.n),datasets:[bar4({label:'Com vagas',data:byA.map(x=>x.cv),backgroundColor:s[0],borderSkipped:false,borderRadius:2}),bar4({label:'Sem vagas',data:byA.map(x=>x.sv),backgroundColor:css('--q2'),borderSkipped:false,borderRadius:2})]},options:{onClick:clickAdm(byA),plugins:{legend:legendTop},scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:45,minRotation:45}},y:{stacked:true}}}},{head:['Administradora','Com vagas','Sem vagas','Vagas','Encerram 90d'],rows:byA.map(x=>[x.n,int(x.cv),int(x.sv),int(x.vag),int(x.e90)])});
+  chart('cGpE',{type:'bar',data:{labels:mk.map(mLabel),datasets:[bar4({label:'Grupos',data:encM,backgroundColor:mk.map((k,i)=>i<3?css('--crit'):s[0])})]},options:{scales:{x:{grid:{display:false}}}}},{head:['Mês','Grupos encerrando'],rows:mk.map((k,i)=>[mLabel(k),int(encM[i])])});
+}
+
+/* ---------- Atendimentos ---------- */
+function pAtend(){
+  const R0=range(), s=SER();
+  const A=ATD2.filter(r=>okA(r)&&inR(r.t,R0)); const tot=sumK(A,'at'), hu=sumK(A,'tr');
+  const w=x=>sumK(A,r=>r[x]*r.at)/(tot||1);
+  const wk=weeksIn(R0).map(([a,b])=>{const x=ATD2.filter(r=>okA(r)&&r.t>=a&&r.t<=b);const t=sumK(x,'at'),h=sumK(x,'tr');return{l:dLabel(a),ia:t-h,hu:h,tma:sumK(x,r=>r.tma*r.at)/(t||1),tmr:sumK(x,r=>r.tmr*r.tr)/(h||1)}});
+  const hours=HOUR_W.map(v=>v/HOUR_W.reduce((a,b)=>a+b,0)*tot);
+  const mot=MOT_A.map((n,j)=>({n,q:tot*MOT_AW[j]}));
+  const ag=AGENTES.map((n,j)=>{const sh=[.22,.2,.18,.16,.14,.1][j];return{n,q:hu*sh,tma:w('tma')*(1.25+.35*hr(j,8)),cs:.86+.1*hr(j,9),sla:Math.min(.99,w('sla')*(.96+.06*hr(j,10)))}});
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Atendimentos',int(tot),'conversas no chat'],['Resolvidos pela IA',pct(tot?(tot-hu)/tot:0),int(tot-hu)+' conversas'],['Com atendente',int(hu),'após transbordo'],['TMA',nf1.format(w('tma'))+' min','tempo médio de atendimento'],['TMR',nf1.format(sumK(A,r=>r.tmr*r.tr)/(hu||1))+' min','primeira resposta do atendente'],['SLA 24h úteis',pct(w('sla')),'resolvidos dentro do prazo']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c7','Volume por semana · IA e atendente','Conversas resolvidas pela IA e transbordadas para humano','cAtW','tall')}
+    ${card('c5','Volume por hora do dia','Distribuição das conversas · base para escala do time','cAtH','tall')}
+    ${card('c6','TMA e TMR por semana','Minutos','cAtT')}
+    ${card('c6','Motivos de contato','Classificação automática das conversas','cAtM')}
+    ${card('c12','Desempenho por atendente','Nomes genéricos',null,null,tableH(['Atendente','Conversas','TMA','CSAT','SLA 24h úteis'],ag.map(x=>`<tr><td>${x.n}</td><td>${int(x.q)}</td><td>${nf1.format(x.tma)} min</td><td>${pct(x.cs,0)}</td><td>${pill(pct(x.sla,0),x.sla>=.92?'--good':x.sla>=.85?'--warn':'--crit')}</td></tr>`)))}
+  </div>`;
+  chart('cAtW',stack(wk.map(x=>x.l),[bar4({label:'IA',data:wk.map(x=>x.ia),backgroundColor:s[0],borderSkipped:false,borderRadius:2}),bar4({label:'Atendente',data:wk.map(x=>x.hu),backgroundColor:s[3],borderSkipped:false,borderRadius:2})]),{head:['Semana','IA','Atendente'],rows:wk.map(x=>[x.l,int(x.ia),int(x.hu)])});
+  chart('cAtH',{type:'bar',data:{labels:HOUR_W.map((_,h)=>h+'h'),datasets:[bar4({label:'Conversas',data:hours,backgroundColor:s[0]})]},options:{scales:{x:{grid:{display:false},ticks:{maxTicksLimit:12}},y:{ticks:{callback:v=>int(v)}}}}},{head:['Hora','Conversas'],rows:hours.map((v,h)=>[h+'h',int(v)])});
+  chart('cAtT',{type:'line',data:{labels:wk.map(x=>x.l),datasets:[{label:'TMA',data:wk.map(x=>x.tma),borderColor:s[0],borderWidth:2,pointRadius:0,tension:.3},{label:'TMR',data:wk.map(x=>x.tmr),borderColor:s[1],borderWidth:2,pointRadius:0,tension:.3}]},options:{interaction:{mode:'index',intersect:false},plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.label+': '+nf1.format(c.raw)+' min'}}},scales:{y:{ticks:{callback:v=>v+' min'}},x:{grid:{display:false},ticks:{maxTicksLimit:8}}}}},{head:['Semana','TMA','TMR'],rows:wk.map(x=>[x.l,nf1.format(x.tma)+' min',nf1.format(x.tmr)+' min'])});
+  chart('cAtM',{type:'bar',data:{labels:mot.map(x=>x.n),datasets:[bar4({label:'Conversas',data:mot.map(x=>x.q),backgroundColor:s[2]})]},options:{indexAxis:'y',scales:{y:{grid:{display:false}}}}},{head:['Motivo','Conversas'],rows:mot.map(x=>[x.n,int(x.q)])});
+}
+
+/* ---------- Reclame Aqui ---------- */
+function pRa(){
+  const R0=range(), s=SER(), months=monthsIn(R0);
+  const X=RA.filter(r=>okA(r)&&inR(r.t,R0)); const resp=X.filter(r=>r.resp), res=X.filter(r=>r.res);
+  const avl=X.filter(r=>r.resp&&hr(r.id,12)<.62);
+  const notaM=avl.length?sumK(avl,'nota')/avl.length:0, volta=avl.length?avl.filter(r=>r.volta).length/avl.length:0;
+  const rep=(.4*(resp.length/(X.length||1))*10+.3*notaM+.2*(res.length/(X.length||1))*10+.1*volta*10);
+  const repL=rep>=8?['Ótimo','--good']:rep>=7?['Bom','--good']:rep>=6?['Regular','--warn']:['Ruim','--crit'];
+  const mm=months.map(k=>{const x=RA.filter(r=>okA(r)&&mKey(r.t)===k);const rp=x.filter(r=>r.resp);return{q:x.length,h:rp.length?sumK(rp,'h')/rp.length:null,res:x.length?x.filter(r=>r.res).length/x.length:null}});
+  const mot=MOT_R.map((n,j)=>({n,q:X.filter(r=>r.m===j).length})).sort((a,b)=>b.q-a.q);
+  const byA=ADMS.map((n,i)=>{const x=RA.filter(r=>r.a===i&&inR(r.t,R0));return{n,i,q:x.length,res:x.length?x.filter(r=>r.res).length/x.length:0}}).sort((a,b)=>b.q-a.q);
+  const last=[...X].sort((a,b)=>b.t-a.t).slice(0,10);
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Reputação',nf1.format(rep),pill(repL[0],repL[1])],['Reclamações',int(X.length),'no período'],['Respondidas',pct(resp.length/(X.length||1),0),''],['Tempo de resposta',nf1.format(resp.length?sumK(resp,'h')/resp.length:0)+' h','média'],['Índice de solução',pct(res.length/(X.length||1),0),''],['Voltaria a fazer negócio',pct(volta,0),'nota média '+nf1.format(notaM)]])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c8','Reclamações e tempo de resposta por mês','Barras = reclamações · linha = horas até a primeira resposta','cRaM','tall')}
+    ${card('c4','Área de maior impacto','Motivo principal das reclamações','cRaT','tall')}
+    ${card('c6','Administradoras mais citadas','Clique numa linha para filtrar',null,null,tableH(['Administradora','Reclamações','Resolvidas'],byA.map(x=>`<tr class="click ${S.adm===x.i?'sel':''}" data-adm="${x.i}"><td>${x.n}</td><td>${int(x.q)}</td><td>${pill(pct(x.res,0),x.res>=.8?'--good':x.res>=.65?'--warn':'--crit')}</td></tr>`)))}
+    ${card('c6','Últimas reclamações','Protocolos fictícios · sem dados do consumidor',null,null,tableH(['Protocolo','Data','Administradora','Motivo','Status'],last.map(r=>`<tr><td style="font-family:var(--f-mono)">RA-${String(100000+Math.floor(hr(r.id,13)*899999))}</td><td>${dLabel(r.t)}</td><td>${ADMS[r.a]}</td><td>${MOT_R[r.m]}</td><td>${r.res?pill('Resolvida','--good'):r.resp?pill('Respondida','--warn'):pill('Sem resposta','--crit')}</td></tr>`)))}
+  </div>`;
+  chart('cRaM',{type:'bar',data:{labels:months.map(mLabel),datasets:[bar4({label:'Reclamações',data:mm.map(x=>x.q),backgroundColor:s[1],yAxisID:'y',order:2}),{type:'line',label:'Tempo de resposta (h)',data:mm.map(x=>x.h),borderColor:s[0],borderWidth:2,pointRadius:3,tension:.3,yAxisID:'y1',order:1}]},options:{plugins:{legend:legendTop},scales:{y:{position:'left'},y1:{position:'right',grid:{display:false},ticks:{callback:v=>v+' h'}},x:{grid:{display:false}}}}},{head:['Mês','Reclamações','Tempo de resposta','% resolvidas'],rows:months.map((k,i)=>[mLabel(k),int(mm[i].q),mm[i].h==null?'–':nf1.format(mm[i].h)+' h',mm[i].res==null?'–':pct(mm[i].res,0)])});
+  chart('cRaT',{type:'doughnut',data:{labels:mot.map(x=>x.n),datasets:[{data:mot.map(x=>x.q),backgroundColor:s,borderColor:css('--panel'),borderWidth:2}]},options:{cutout:'58%',plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,boxHeight:10}}}}},{head:['Motivo','Reclamações'],rows:mot.map(x=>[x.n,int(x.q)])});
+}
+
+/* ---------- WhatsApp · Meta API ---------- */
+function pMeta(){
+  const R0=range(), s=SER(), {long,keys,key,lab}=keysFor(R0);
+  const W=WA.filter(r=>inR(r.t,R0)); const sh=S.adm>=0?AW[S.adm]:1;
+  const cat=WA_CAT.map((_,j)=>sumK(W,r=>r.c[j])*sh), tot=cat.reduce((a,b)=>a+b,0);
+  const cost=cat.reduce((a,v,j)=>a+v*WA_PRICE[j],0);
+  const old=(cat[0]+cat[1])*(.74/.9)*WA_PRICE[0]+(cat[0]+cat[1])*(.16/.9)*WA_PRICE[1]+cat[3]*WA_PRICE[3];
+  const byK=WA_CAT.map((_,j)=>keys.map(k=>sumK(W.filter(r=>key(r.t)===k),r=>r.c[j])*sh));
+  const costK=keys.map((k,i)=>WA_CAT.reduce((a,_,j)=>a+byK[j][i]*WA_PRICE[j],0));
+  const util=keys.map((k,i)=>byK[1][i]/((byK[0][i]+byK[1][i])||1));
+  const TPL=[['lembrete_assinatura','Utilidade',.62],['status_pagamento','Utilidade',.71],['documento_pendente','Utilidade',.58],['proposta_disponivel','Utilidade',.55],['oferta_nova_proposta','Marketing',.38],['retomada_contato','Marketing',.31],['codigo_acesso','Autenticação',.88]];
+  document.getElementById('page').innerHTML=`
+  ${kpiRow([['Mensagens',int(tot),'templates enviados'],['Custo no período',brl(cost),'tabela de preços simulada'],['Custo por mensagem','R$ '+nf2.format(cost/(tot||1)),''],['% utilidade',pct(cat[1]/((cat[0]+cat[1])||1),0),'do volume transacional'],['Economia estimada',brl(Math.max(0,old-cost)),'vs. mix antes da migração'],['Opt-out',int(sumK(W,'opt')*sh),'saídas da lista']])}
+  <div class="grid" style="margin-top:14px">
+    ${card('c8',long?'Mensagens por mês e categoria':'Mensagens por dia e categoria','A migração de templates de marketing para utilidade derrubou o custo por mensagem','cWaC','tall')}
+    ${card('c4','Qualidade dos números','Status de qualidade e limite de envio na Meta',null,null,tableH(['Número','Qualidade','Limite'],NUMS.map(n=>`<tr><td>${n.n}</td><td>${pill(n.q,n.q==='Alta'?'--good':'--warn')}</td><td>${n.lim}</td></tr>`))+`<div class="hint" style="margin-top:10px">Números e limites ilustrativos.</div>`)}
+    ${card('c6',long?'Custo e % utilidade por mês':'Custo e % utilidade por dia','Barras = custo · linha = participação de utilidade','cWaU')}
+    ${card('c6','Templates','Categoria e taxa de leitura',null,null,tableH(['Template','Categoria','Leitura'],TPL.map(t=>`<tr><td style="font-family:var(--f-mono);font-size:12px">${t[0]}</td><td>${t[1]}</td><td>${pct(t[2],0)}</td></tr>`)))}
+  </div>`;
+  chart('cWaC',stack(keys.map(lab),WA_CAT.map((c,j)=>bar4({label:c,data:byK[j],backgroundColor:[s[1],s[0],s[2],s[4]][j],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:12})),{scales:{x:{stacked:true,grid:{display:false},ticks:{maxTicksLimit:14}},y:{stacked:true,ticks:{callback:v=>int(v/1000)+' mil'}}}}),{head:[long?'Mês':'Dia',...WA_CAT],rows:keys.map((k,i)=>[lab(k),...WA_CAT.map((c,j)=>int(byK[j][i]))])});
+  chart('cWaU',{type:'bar',data:{labels:keys.map(lab),datasets:[bar4({label:'Custo',data:costK,backgroundColor:s[0],yAxisID:'y',order:2,maxBarThickness:long?34:12}),{type:'line',label:'% utilidade',data:util,borderColor:s[2],borderWidth:2,pointRadius:long?3:0,tension:.3,yAxisID:'y1',order:1}]},options:{plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'?'% utilidade: '+pct(c.raw,0):'Custo: '+brl(c.raw)}}},scales:{y:{ticks:{callback:v=>brl(v)}},y1:{position:'right',min:0,max:1,grid:{display:false},ticks:{callback:v=>pct(v,0)}},x:{grid:{display:false},ticks:{maxTicksLimit:12}}}}},{head:[long?'Mês':'Dia','Custo','% utilidade'],rows:keys.map((k,i)=>[lab(k),brl(costK[i]),pct(util[i],0)])});
+}
+
+/* ---------- Central de administradoras ---------- */
+function pAdms(){
+  const R0=range(), s=SER();
+  const rows=ADMS.map((n,i)=>{const e=ENV.filter(r=>r.a===i&&inR(r.t,R0)),f=FECH.filter(r=>r.a===i&&inR(r.t,R0)),pg=f.filter(r=>r.tp!=null);const env=sumK(e,'env'),vis=sumK(e,'vis');const np=NPS.filter(r=>r.a===i&&inR(r.t,R0));const nps=np.length?(np.filter(r=>r.nota>=9).length-np.filter(r=>r.nota<=6).length)/np.length*100:0;const cn=CANC.filter(r=>r.a===i&&inR(r.t,R0)).length;const ra=RA.filter(r=>r.a===i&&inR(r.t,R0)).length;
+    const o={n,i,env,vis:env?vis/env:0,conv:vis?f.length/vis:0,cred:sumK(f,'credito'),q:f.length,pz:pg.length?pg.filter(r=>r.prazo<=21).length/pg.length:0,nps,canc:cn/(cn+f.length||1),ra:ra/((f.length||1)/1000)};return o});
+  const norm=(k,inv)=>{const v=rows.map(r=>r[k]),mn=Math.min(...v),mx=Math.max(...v);rows.forEach(r=>{r['s_'+k]=mx===mn?.5:(inv?(mx-r[k]):(r[k]-mn))/(mx-mn)})};
+  ['conv','pz','nps'].forEach(k=>norm(k));['canc','ra'].forEach(k=>norm(k,1));
+  rows.forEach(r=>r.score=Math.round(100*(.3*r.s_conv+.25*r.s_pz+.2*r.s_nps+.15*r.s_canc+.1*r.s_ra)));
+  const srt=[...rows].sort((a,b)=>b.score-a.score);
+  document.getElementById('page').innerHTML=`
+  <div class="grid">
+    ${card('c12','Ranking de administradoras','Nota composta: conversão 30% · pagamento no prazo 25% · NPS 20% · cancelamento 15% · Reclame Aqui 10% · clique numa linha para filtrar as outras páginas',null,null,tableH(['#','Administradora','Nota','Propostas','Visualização','Conversão','Crédito fechado','No prazo','NPS','Cancelamento','RA por mil cotas'],srt.map((x,j)=>`<tr class="click ${S.adm===x.i?'sel':''}" data-adm="${x.i}"><td>${j+1}</td><td>${x.n}</td><td>${pill(x.score,x.score>=65?'--good':x.score>=40?'--warn':'--crit')}</td><td>${int(x.env)}</td><td>${pct(x.vis,0)}</td><td>${pct(x.conv,2)}</td><td>${brl(x.cred)}</td><td>${pct(x.pz,0)}</td><td>${nf0.format(x.nps)}</td><td>${pct(x.canc,1)}</td><td>${nf1.format(x.ra)}</td></tr>`)))}
+    ${card('c12','Conversão × pagamento no prazo','Cada bolha é uma administradora · tamanho = crédito fechado no período','cAdmB','tall')}
+  </div>`;
+  const mx=Math.max(...rows.map(r=>r.cred));
+  chart('cAdmB',{type:'bubble',data:{datasets:rows.map((r,j)=>({label:r.n,data:[{x:r.conv,y:r.pz,r:6+22*Math.sqrt(r.cred/mx)}],backgroundColor:s[j%8]+'aa',borderColor:s[j%8]}))},options:{onClick:(e,els)=>{if(els[0]){const i=els[0].datasetIndex;S.adm=S.adm===i?-1:i;setTimeout(render,0)}},plugins:{legend:legendTop,tooltip:{callbacks:{label:c=>c.dataset.label+': conversão '+pct(c.raw.x,2)+' · no prazo '+pct(c.raw.y,0)}}},scales:{x:{title:{display:true,text:'conversão de visualizadas'},ticks:{callback:v=>pct(v,1)}},y:{title:{display:true,text:'pagas no prazo'},ticks:{callback:v=>pct(v,0)}}}}},{head:['Administradora','Conversão','No prazo','Crédito'],rows:rows.map(r=>[r.n,pct(r.conv,2),pct(r.pz,0),brl(r.cred)])});
+}
+
+/* ---------- Assessorias ---------- */
+function pAssess(){
+  const R0=range(), s=SER(); const X=ASS.filter(r=>inR(r.t,R0));
+  const st=[['Enviado autosserviço','env'],['Acessou a proposta','ac'],['Gerou contrato','ge'],['Assinatura cliente','cl'],['Assinatura comprador','co'],['Transferência','tr'],['Pago','pg']];
+  const tot=st.map(([l,k])=>[l,sumK(X,k)]);
+  const by=ASSES.map((n,i)=>{const x=X.filter(r=>r.s===i);const env=sumK(x,'env'),pg=sumK(x,'pg');return{n,i,env,pg,cl:sumK(x,'cl'),conv:env?pg/env:0,cred:sumK(x,'cred'),tx:sumK(x,'cred')*.0072*(pg/(env||1)),pk:x.length?x[0].pk:0}}).sort((a,b)=>b.conv-a.conv);
+  const {long,keys,key,lab}=keysFor(R0); const vol=ASSES.map((_,i)=>keys.map(k=>sumK(X.filter(r=>r.s===i&&key(r.t)===k),'env')));
+  const ramp=['--q7','--q6','--q5','--q4','--q4','--q3','--q2'].map(css);
+  document.getElementById('page').innerHTML=`<div class="grid">
+    <section class="card c6"><div class="ch"><div><h3>Funil de conversão · todas as assessorias</h3><div class="sub">Coorte por data de envio ao autosserviço</div></div></div>
+      <div class="funnel">${tot.map((x,i)=>`<div class="fs"><span>${x[0]}</span><span class="bar"><i style="width:${Math.max(.6,x[1]/(tot[0][1]||1)*100)}%;background:${ramp[i]}"></i></span><span class="num">${int(x[1])}<small>${i?pct(x[1]/(tot[i-1][1]||1),0):'base'}</small></span></div>`).join('')}</div></section>
+    ${card('c6','Por assessoria','Conversão envio → pago, taxa de transferência estimada e horário de pico',null,null,tableH(['Assessoria','Enviadas','Pagas','Conversão','Taxa de transf.','Pico de envio'],by.map(x=>`<tr><td>${x.n}</td><td>${int(x.env)}</td><td>${int(x.pg)}</td><td>${pct(x.conv,1)}</td><td>${brl(x.tx)}</td><td>${x.pk}h</td></tr>`)))}
+    ${card('c12',long?'Envios por mês e assessoria':'Envios por dia e assessoria','Volume enviado ao autosserviço','cAsV','tall')}
+  </div>`;
+  chart('cAsV',stack(keys.map(lab),ASSES.map((n,i)=>bar4({label:n,data:vol[i],backgroundColor:s[i],borderSkipped:false,borderRadius:2,maxBarThickness:long?34:12}))),{head:[long?'Mês':'Dia',...ASSES],rows:keys.map((k,j)=>[lab(k),...ASSES.map((n,i)=>int(vol[i][j]))])});
 }
 
 /* ===================== EVENTOS ===================== */
